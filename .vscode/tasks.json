@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run ruff",
+            "type": "shell",
+            "command": "ruff check .",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$ruff"
+            ]
+        }
+    ]
+}

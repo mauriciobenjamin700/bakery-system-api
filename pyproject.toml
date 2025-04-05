@@ -1,0 +1,32 @@
+[project]
+name = "template-api-fastapi"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "asyncpg>=0.30.0",
+    "bcrypt>=4.3.0",
+    "fastapi>=0.115.11",
+    "httpx>=0.28.1",
+    "pydantic>=2.10.6",
+    "pydantic-settings>=2.8.1",
+    "python-decouple>=3.8",
+    "pyyaml>=6.0.2",
+    "sqlalchemy>=2.0.39",
+    "uvicorn>=0.34.0",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.25.3",
+    "ruff>=0.11.2",
+]
+
+[tool.ruff]
+lint.select = ["F401", "N802", "N803", "N806"]  # Adiciona verificações de estilo de código
+# "E501" = line too long (82 > 79 characters)
+#line-length = 79  # Define o comprimento máximo da linha pela pep8

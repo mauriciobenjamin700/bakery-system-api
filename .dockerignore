@@ -1,0 +1,9 @@
+*.txt
+*.pyc
+
+.vscode
+.venv
+
+docs
+docker
+tests
