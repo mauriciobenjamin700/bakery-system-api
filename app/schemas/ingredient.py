@@ -1,8 +1,7 @@
 import datetime
 from pydantic import (
     Field,
-    field_validator,
-    model_validator    
+    field_validator
 )
 
 
@@ -11,28 +10,49 @@ from app.schemas.settings.base import BaseSchema
 
 class IngredientRequest(BaseSchema):
     """
-    Essa classe serve para inserir um registro de "Ingredient" no banco de dados.
+    A schema with data to create a new ingredient on db
 
-    - Attributes:
-        - name: str
-        - measure: IngredientMeasureEnum
-        - image_path: str
-        - mark: str
-        - description: str
-        - value: float
-        - validity: date
-        - quantity: float
-        - min_quantity: float
+    A
     """
-    name: str = Field(examples=["Farinha de trigo", "Açúcar", "Sal"])
-    measure: IngredientMeasureEnum = Field(examples=[IngredientMeasureEnum.KG, IngredientMeasureEnum.L, IngredientMeasureEnum.UNITY])
-    image_path: str | None = Field(examples=["/images/farinha.jpg", "/images/acucar.jpg", "/images/sal.jpg"], default=None)
-    mark: str = Field(examples=["Marca A", "Marca B", "Marca C"])
-    description: str = Field(examples=["Farinha de trigo para bolos", "Açúcar cristal", "Sal refinado"])
-    value: float = Field(examples=[1.5, 2.0, 3.0])
-    min_quantity: float = Field(examples=[0.5, 1.0, 2.0])
-    validity: datetime.date | None = Field(examples=["2023-12-31", "2024-01-01", "2024-02-28"], default=None)
-    quantity: float =  Field(examples=[10.0, 20.0, 30.0])
+    name: str = Field(
+        examples=["Farinha de trigo", "Açúcar", "Sal"],
+        default=None
+        validate_default=True
+    )
+    measure: IngredientMeasureEnum = Field(
+        examples=[IngredientMeasureEnum.KG, IngredientMeasureEnum.L, IngredientMeasureEnum.UNITY],
+        default=None,
+        validate_default=True
+    )
+    mark: str = Field(
+        examples=["Marca A", "Marca B", "Marca C"],
+        default=None,
+        validate_default=True
+    )
+    description: str = Field(
+        examples=["Farinha de trigo para bolos", "Açúcar cristal", "Sal refinado"],
+        default=None,
+        validate_default=True
+    )
+    value: float = Field(
+        examples=[1.5, 2.0, 3.0],
+        default=None,
+        validate_default=True
+    )
+    min_quantity: float = Field(
+        examples=[0.5, 1.0, 2.0],
+        default=None,
+        validate_default=True
+    )
+    validity: datetime.date | None = Field(
+        examples=["2023-12-31", "2024-01-01", "2024-02-28"], 
+        default=None
+    )
+    quantity: float =  Field(
+        examples=[10.0, 20.0, 30.0],
+        default=None,
+        validate_default=True
+    )
 
     
     @field_validator("name")
@@ -51,6 +71,16 @@ class IngredientRequest(BaseSchema):
         
         if v not in IngredientMeasureEnum.values():
             raise ValueError("A medida do ingrediente deve ser maior que zero")
+        return v
+    
+    @field_validator("mark")
+    def validate_mark(cls, v):
+        if not v:
+            raise ValueError("A marca do ingrediente é obrigatório")
+        if isinstance(v, str):
+            v.strip()
+            if v.strip() == "":
+                raise ValueError("A marca do ingrediente é obrigatória")
         return v
     
     @field_validator("value")
