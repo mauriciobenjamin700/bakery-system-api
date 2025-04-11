@@ -1,7 +1,6 @@
 from datetime import datetime
 from pydantic import (
-    field_validator,
-    model_validator
+    field_validator
 )
 
 

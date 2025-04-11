@@ -6,9 +6,7 @@ classes:
 
 """
 
-from sqlalchemy import func
 from datetime import datetime
-from src.controllers.services.check_fields import check_fields_formated
 
 from src.models.schemas.product import *
 
@@ -18,7 +16,7 @@ from src.models.database.models import (
     )
 
 from src.controllers.use_cases.recipe import UseCaseRecipe
-from src.models.schemas.recipe import RecipeRequest, RecipeResponse
+from src.models.schemas.recipe import RecipeRequest
 
 class UseCaseProduct():
     """

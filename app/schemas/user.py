@@ -1,13 +1,14 @@
 from pydantic import Field
+
 from app.core.constants.enums.user import UserRoles
 from app.schemas.settings.base import BaseSchema
-from app.schemas.settings.fields import(
+from app.schemas.settings.fields import (
     created_at_field,
+    email_field,
     id_field,
     name_field,
-    phone_field,
-    email_field,
     password_field,
+    phone_field,
     updated_at_field,
 )
 from app.schemas.settings.validators import (
@@ -40,6 +41,7 @@ class UserRequest(BaseSchema):
     - Raises:
         - ValidationError: If any field is invalid.
     """
+
     name: str = name_field()
     phone: str = phone_field()
     email: str = email_field()
@@ -74,13 +76,14 @@ class UserResponse(BaseSchema):
     - Raises:
         - ValidationError: If any field is invalid
     """
+
     id: str = id_field()
     name: str = name_field()
     phone: str = phone_field()
     email: str = email_field()
     role: UserRoles = Field(examples=[UserRoles.USER.value])
     created_at: str = created_at_field()
-    updated_at: str =  updated_at_field()
+    updated_at: str = updated_at_field()
 
     __id_validator = validate_id
     __name_validator = validate_name

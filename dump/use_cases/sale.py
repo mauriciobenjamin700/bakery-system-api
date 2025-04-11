@@ -1,4 +1,3 @@
-from src.controllers.services.check_fields import check_fields_formated
 from src.models.schemas.sale import *
 from src.models.database.models import (
     ProductSale as ProductSaleModel,

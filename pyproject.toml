@@ -20,6 +20,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
     "pre-commit>=4.2.0",
     "pytest>=8.3.5",
     "pytest-asyncio>=0.25.3",
@@ -27,6 +29,30 @@ dev = [
 ]
 
 [tool.ruff]
-lint.select = ["F401", "N802", "N803", "N806"]  # Adiciona verificações de estilo de código
-# "E501" = line too long (82 > 79 characters)
-#line-length = 79  # Define o comprimento máximo da linha pela pep8
+lint.select = [
+    "F401",  # Remove imports não utilizados
+    "N802",  # Nomes de métodos devem ser snake_case
+    "N803",  # Nomes de variáveis devem ser snake_case
+    "N806",  # Nomes de constantes devem ser UPPER_CASE
+    "E302",  # Exige 2 linhas em branco antes de funções e classes
+    "E305",  # Exige 2 linhas em branco após o final de uma classe ou função
+    "D101",  # Classes públicas devem ter docstring
+    "D102",  # Métodos públicos devem ter docstring
+    "D103",  # Funções públicas devem ter docstring
+]
+line-length = 79
+preview = true
+lint.fixable = ["E302", "E305", "F401"]  # Adicione regras que podem ser corrigidas automaticamente
+
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 79
+
+[tool.black]
+line-length = 79
+skip-string-normalization = false

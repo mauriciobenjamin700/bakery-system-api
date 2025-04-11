@@ -8,7 +8,10 @@ class BaseSchema(BaseModel):
     - Methods:
         - to_dict: Method to convert the model to a dictionary.
     """
-    def to_dict(self, exclude: list = [], include: dict = {}, remove_none: str = True) -> dict:
+
+    def to_dict(
+        self, exclude: list = [], include: dict = {}, remove_none: str = True
+    ) -> dict:
         """
         Method to convert the model to a dictionary.
 

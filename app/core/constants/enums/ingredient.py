@@ -10,6 +10,7 @@ class IngredientMeasureEnum(BaseEnum):
         - L: str = "l"
         - UNITY: str = "un"
     """
+
     KG = "kg"
     L = "l"
     UNITY = "un"

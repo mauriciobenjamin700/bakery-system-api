@@ -18,7 +18,7 @@ class BaseEnum(str, Enum):
             - list: A list of the values of the Enum.
         """
         return [item.value for item in self.__class__]
-    
+
     def keys(self):
         """
         Returns the keys of the Enum as a list.

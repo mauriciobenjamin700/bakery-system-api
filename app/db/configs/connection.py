@@ -1,10 +1,11 @@
+from typing import Optional
+
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
+    AsyncSession,
     async_sessionmaker,
-    AsyncSession
+    create_async_engine,
 )
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
-from typing import Optional
 
 from app.core.settings import config
 from app.db.configs.base import Base
@@ -32,6 +33,7 @@ class AsyncDatabaseManager:
     - Raises:
         - Exception: If the database connection fails.
     """
+
     def __init__(self, db_url: str = config.DB_URL) -> None:
         self.db_url = db_url
         self._engine: Optional[AsyncEngine] = None
@@ -45,21 +47,16 @@ class AsyncDatabaseManager:
                 self._engine = create_async_engine(
                     self.db_url,
                     echo=False,
-                    connect_args={"check_same_thread": False}
+                    connect_args={"check_same_thread": False},
                 )
             else:
                 # Configuration for other databases
                 self._engine = create_async_engine(
-                    self.db_url,
-                    echo=False,
-                    pool_size=10,
-                    max_overflow=5
+                    self.db_url, echo=False, pool_size=10, max_overflow=5
                 )
 
             self._session_maker = async_sessionmaker(
-                self._engine,
-                expire_on_commit=False,
-                class_=AsyncSession
+                self._engine, expire_on_commit=False, class_=AsyncSession
             )
 
     async def disconnect(self) -> None:
@@ -68,7 +65,6 @@ class AsyncDatabaseManager:
             await self._engine.dispose()
             self._engine = None
             self._session_maker = None
-
 
     async def create_tables(self) -> None:
         """Create all tables in the database."""
@@ -95,7 +91,7 @@ class AsyncDatabaseManager:
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
         """Exit the async context manager."""
-        if hasattr(self, '_session'):
+        if hasattr(self, "_session"):
             await self._session.close()
         await self.disconnect()
 

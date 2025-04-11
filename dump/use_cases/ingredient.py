@@ -6,7 +6,6 @@ classes:
 
 """
 
-from sqlalchemy import func 
 
 from src.models.database.models import (
     Ingredient as IngredientModel, 
