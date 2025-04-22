@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.constants.enums.user import UserRoles
 from app.core.constants.messages import (
     ERROR_DATABASE_USER_NOT_FOUND,
     ERROR_DATABASE_USERS_NOT_FOUND,
@@ -29,8 +28,6 @@ class UserService:
       - get_all: Get all users from the database.
       - update: Update a user in the database.
       - delete: Delete a user from the database.
-      - map_request_to_model: Map a user request to a user model.
-      - map_model_to_response: Map a user model to a user response.
 
     """
 
@@ -50,11 +47,11 @@ class UserService:
 
         request.password = hash_password(request.password)
 
-        model = self.map_request_to_model(request)
+        model = self.repository.map_request_to_model(request)
 
         model = await self.repository.add(model)
 
-        response = self.map_model_to_response(model)
+        response = self.repository.map_model_to_response(model)
 
         return response
 
@@ -74,7 +71,7 @@ class UserService:
 
             raise NotFoundError(ERROR_DATABASE_USER_NOT_FOUND)
 
-        response = self.map_model_to_response(model)
+        response = self.repository.map_model_to_response(model)
 
         return response
 
@@ -93,7 +90,7 @@ class UserService:
 
             raise NotFoundError(ERROR_DATABASE_USERS_NOT_FOUND)
 
-        response = [self.map_model_to_response(model) for model in models]
+        response = [self.repository.map_model_to_response(model) for model in models]
 
         return response
 
@@ -121,7 +118,7 @@ class UserService:
 
         model = await self.repository.update(model)
 
-        response = self.map_model_to_response(model)
+        response = self.repository.map_model_to_response(model)
 
         return response
 
@@ -138,35 +135,4 @@ class UserService:
         await self.repository.delete(id=id)
 
         return Message(detail=MESSAGE_USER_DELETE_SUCCESS)
-
-    @classmethod
-    def map_request_to_model(cls, request: UserRequest) -> UserModel:
-        """
-        A method to map a user request to a user model.
-
-        - Args:
-            - request: UserRequest : A user request object.
-
-        - Returns:
-            - model: UserModel : A user model object.
-        """
-        model = UserModel(
-            **request.to_dict(include={"role": UserRoles.USER.value})
-        )
-
-        return model
-
-    @classmethod
-    def map_model_to_response(cls, model: UserModel) -> UserResponse:
-        """
-        A method to map a user model to a user response.
-
-        - Args:
-            - model: UserModel : A user model object.
-
-        - Returns:
-            - response: UserResponse : A user response object.
-        """
-        response = UserResponse(**model.to_dict(exclude=["password"]))
-
-        return response
+    

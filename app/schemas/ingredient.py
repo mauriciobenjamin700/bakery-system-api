@@ -130,32 +130,6 @@ class IngredientRequest(IngredientBase):
                 )
             return v
         
-        
-class IngredientResponse(IngredientBase):
-    """
-    Essa classe serve para retornar um registro de "Ingredient" com a quantidade e a validade do lote
-
-    - Attributes:
-        - id:str (O id do ingrediente)
-        - name: str
-        - measure: int
-        - image_path: str | None = None
-        - mark: str | None = None
-        - description: str | None = None
-        - value: float
-        - validity: date | None = None
-        - quantity: float
-        - min_quantity: float | None = None
-    """
-
-    id: str = Field(examples=["1", "2", "3"])
-    image_path: str | None = Field(
-        examples=[
-            "/images/farinha.jpg",
-            "/images/açúcar.jpg",
-            "/images/sal.jpg",
-        ]
-    )
 
 
 class IngredientBatchBase(IngredientBase):
@@ -225,7 +199,7 @@ class IngredientBatchRequest(IngredientBatchBase):
     pass
 
 
-class LoteIngredientResponse(IngredientBatchBase):
+class IngredientBatchResponse(IngredientBatchBase):
     """
     A schema with data to create a new ingredient on db
 
@@ -234,11 +208,42 @@ class LoteIngredientResponse(IngredientBatchBase):
         id (str): The id of the ingredient
         quantity (float): The quantity of the ingredient
         validity (date): The validity of the ingredient
-        register_date (datetime): The register date of the ingredient
+        created_at (str): The date and time when the ingredient was created
+        updated_at (str): The date and time when the ingredient was last updated
     """
 
     
     id: str = Field(examples=["1", "2", "3"])
-    register_date: datetime.datetime | None = Field(
-        examples=["2023-12-31", "2024-01-01", "2024-02-28"]
+    created_at: str = Field(
+        examples=["2023-12-31 12:00:00", "2024-01-01 12:00:00", "2024-02-28 12:00:00"]
     )
+    updated_at : str = Field(
+        examples=["2023-12-31 12:00:00", "2024-01-01 12:00:00", "2024-02-28 12:00:00"]
+    )
+
+
+class IngredientResponse(IngredientBase):
+    """
+    Essa classe serve para retornar um registro de "Ingredient" com a quantidade e a validade do lote
+
+    Attributes:
+        id (str): The id of the ingredient
+        name (str): The name of the ingredient
+        measure (int): The measure of the ingredient
+        mark (str): The mark of the ingredient
+        description (str): The description of the ingredient
+        value (float): The value of the ingredient
+        min_quantity (float): The minimum quantity of the ingredient
+        quantity (float): The quantity of the ingredient
+        image_path (str): The path to the image of the ingredient
+    """
+
+    id: str = Field(examples=["1", "2", "3"])
+    image_path: str | None = Field(
+        examples=[
+            "/images/farinha.jpg",
+            "/images/açúcar.jpg",
+            "/images/sal.jpg",
+        ]
+    )
+    batches: list[IngredientBatchResponse]

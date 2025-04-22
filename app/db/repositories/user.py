@@ -1,6 +1,7 @@
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants.enums.user import UserRoles
 from app.core.constants.messages import (
     ERROR_DATABASE_USER_ALREADY_EXISTS,
     ERROR_DATABASE_USER_NOT_FOUND,
@@ -8,6 +9,7 @@ from app.core.constants.messages import (
 )
 from app.core.errors import ConflictError, NotFoundError, ValidationError
 from app.db.models import UserModel
+from app.schemas.user import UserRequest, UserResponse
 
 
 class UserRepository:
@@ -116,3 +118,37 @@ class UserRepository:
 
         else:
             raise ValidationError("id", ERROR_REQUIRED_FIELD_ID)
+        
+        
+    @staticmethod
+    def map_request_to_model(request: UserRequest) -> UserModel:
+        """
+        A method to map a user request to a user model.
+
+        - Args:
+            - request: UserRequest : A user request object.
+
+        - Returns:
+            - model: UserModel : A user model object.
+        """
+        model = UserModel(
+            **request.to_dict(include={"role": UserRoles.USER.value})
+        )
+
+        return model
+
+    @staticmethod
+    def map_model_to_response(model: UserModel) -> UserResponse:
+        """
+        A method to map a user model to a user response.
+
+        - Args:
+            - model: UserModel : A user model object.
+
+        - Returns:
+            - response: UserResponse : A user response object.
+        """
+        response = UserResponse(**model.to_dict(exclude=["password"]))
+
+        return response
+
