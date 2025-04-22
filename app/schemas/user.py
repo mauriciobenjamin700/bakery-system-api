@@ -2,15 +2,6 @@ from pydantic import Field
 
 from app.core.constants.enums.user import UserRoles
 from app.schemas.settings.base import BaseSchema
-from app.schemas.settings.fields import (
-    created_at_field,
-    email_field,
-    id_field,
-    name_field,
-    password_field,
-    phone_field,
-    updated_at_field,
-)
 from app.schemas.settings.validators import (
     validate_created_at,
     validate_email,
@@ -21,73 +12,93 @@ from app.schemas.settings.validators import (
     validate_updated_at,
 )
 
-
-class UserRequest(BaseSchema):
-    """
-    Class to validate the request body of the user register endpoint.
-
-    - Args:
-        - name: str,
-        - phone: str,
-        - email: str,
-        - password: str
-
-    - Attributes:
-        - name: str,
-        - phone: str,
-        - email: str,
-        - password: str
-
-    - Raises:
-        - ValidationError: If any field is invalid.
-    """
-
-    name: str = name_field()
-    phone: str = phone_field()
-    email: str = email_field()
-    password: str = password_field()
-
-    __name_validator = validate_name
-    __phone_validator = validate_phone
-    __email_validator = validate_email
-    __password_validator = validate_password
-
-
-class UserResponse(BaseSchema):
+class UserBase(BaseSchema):
     """
     Class to contain data about the user.
 
-    - Args:
-        - id: str,
-        - name: str,
-        - phone: str,
-        - email: str,
-        - created_at: str,
-        - updated_at: str
+    Attributes:
+        id (str): The user's ID.
+        name (str): The user's name.
+        phone (str): The user's phone number.
+        email (str): The user's email address.
+    """
+    name: str = Field(
+        examples=["John Doe", "Jane Smith"],
+        default=None,
+        validate_default=True
+    )
+    phone: str = Field(
+        examples=["89912344321"],
+        default=None,
+        validate_default=True
+    )
+    email: str = Field(
+        examples=["test@test.com"],
+        default=None,
+        validate_default=True
+    )
+    
+    
+    _name_validator = validate_name
+    _phone_validator = validate_phone
+    _email_validator = validate_email
 
-    - Attributes:
-        - id: str,
-        - name: str,
-        - phone: str,
-        - email: str,
-        - created_at: str,
-        - updated_at: str
+class UserRequest(UserBase):
+    """
+    Class to validate the request body of the user register endpoint.
 
-    - Raises:
-        - ValidationError: If any field is invalid
+    Attributes:
+        name (str): The user's name.
+        phone (str): The user's phone number.
+        email (str): The user's email address.
+        password (str): The user's password.
     """
 
-    id: str = id_field()
-    name: str = name_field()
-    phone: str = phone_field()
-    email: str = email_field()
-    role: UserRoles = Field(examples=[UserRoles.USER.value])
-    created_at: str = created_at_field()
-    updated_at: str = updated_at_field()
+    password: str = Field(
+        examples=["passWord123@"],
+        default=None,
+        validate_default=True
+    )
 
-    __id_validator = validate_id
-    __name_validator = validate_name
-    __phone_validator = validate_phone
-    __email_validator = validate_email
-    __created_at_validator = validate_created_at
-    __updated_at_validator = validate_updated_at
+
+    _password_validator = validate_password
+
+
+class UserResponse(UserBase):
+    """
+    Class to contain data about the user.
+
+    Attributes:
+        id (str): The user's ID.
+        name (str): The user's name.
+        phone (str): The user's phone number.
+        email (str): The user's email address.
+        role (str): The user's role.
+        created_at (str): The date and time when the user was created.
+        updated_at (str): The date and time when the user was last updated.
+    """
+
+    id: str = Field(
+        examples=["89912344321"],
+        default=None,
+        validate_default=True
+    )
+    role: UserRoles = Field(
+        examples=[UserRoles.USER.value],
+        default=None,
+        validate_default=True
+    )
+    created_at: str = Field(
+        examples=["2023-10-01 12:00:00"],
+        default=None,
+        validate_default=True
+    )
+    updated_at: str = Field(
+        examples=["2023-10-01 12:00:00"],
+        default=None,
+        validate_default=True
+    )
+
+    _id_validator = validate_id
+    _created_at_validator = validate_created_at
+    _updated_at_validator = validate_updated_at

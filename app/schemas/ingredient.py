@@ -6,11 +6,19 @@ from app.core.constants.enums.ingredient import IngredientMeasureEnum
 from app.schemas.settings.base import BaseSchema
 
 
-class IngredientRequest(BaseSchema):
+class IngredientBase(BaseSchema):
     """
-    A schema with data to create a new ingredient on db
+    Base schema for Ingredient
+    
+    Attributes:
+        name (str): The name of the ingredient
+        measure (IngredientMeasureEnum): The measure of the ingredient
+        mark (str): The mark of the ingredient
+        description (str): The description of the ingredient
+        value (float): The value of the ingredient
+        min_quantity (float): The minimum quantity of the ingredient
+        quantity (float): The quantity of the ingredient
     """
-
     name: str = Field(
         examples=["Farinha de trigo", "Açúcar", "Sal"],
         default=None,
@@ -38,56 +46,38 @@ class IngredientRequest(BaseSchema):
         ],
         default=None,
         validate_default=True,
-    )
+    ) 
     value: float = Field(
         examples=[1.5, 2.0, 3.0], default=None, validate_default=True
     )
     min_quantity: float = Field(
         examples=[0.5, 1.0, 2.0], default=None, validate_default=True
     )
-    validity: datetime.date | None = Field(
-        examples=["2023-12-31", "2024-01-01", "2024-02-28"], default=None
-    )
     quantity: float = Field(
         examples=[10.0, 20.0, 30.0], default=None, validate_default=True
     )
 
-    @field_validator("name")
-    def validate_name(cls, v):
-        """
-        Implementar
-        """
-        if not v:
-            raise ValueError("O nome do ingrediente é obrigatório")
+class IngredientRequest(IngredientBase):
+    """
+    A schema with data to create a new ingredient on db
+    
+    Attributes:
+        name (str): The name of the ingredient
+        measure (int): The measure of the ingredient
+        mark (str): The mark of the ingredient
+        description (str): The description of the ingredient
+        value (float): The value of the ingredient
+        min_quantity (float): The minimum quantity of the ingredient
+        validity (date): The validity of the ingredient
+        quantity (float): The quantity of the ingredient
+    """
 
-        if v.strip() == "":
-            raise ValueError("O nome do ingrediente é obrigatório")
-        return v
 
-    @field_validator("measure")
-    def validate_measure(cls, v):
-        """
-        Implementar
-        """
-        if not v:
-            raise ValueError("A medida do ingrediente é obrigatório")
+    validity: datetime.date | None = Field(
+        examples=["2023-12-31", "2024-01-01", "2024-02-28"],
+        default=None
+    )
 
-        if v not in IngredientMeasureEnum.values():
-            raise ValueError("A medida do ingrediente deve ser maior que zero")
-        return v
-
-    @field_validator("mark")
-    def validate_mark(cls, v):
-        """
-        Implementar
-        """
-        if not v:
-            raise ValueError("A marca do ingrediente é obrigatório")
-        if isinstance(v, str):
-            v.strip()
-            if v.strip() == "":
-                raise ValueError("A marca do ingrediente é obrigatória")
-        return v
 
     @field_validator("value")
     def validate_value(cls, v):
@@ -139,24 +129,51 @@ class IngredientRequest(BaseSchema):
                     "A quantidade minima do ingrediente deve ser maior que zero"
                 )
             return v
-
-
-class LoteIngredientRequest(BaseSchema):
+        
+        
+class IngredientResponse(IngredientBase):
     """
-    Essa classe serve para cadastrar um registro de "LoteIngredient" no banco de dados
+    Essa classe serve para retornar um registro de "Ingredient" com a quantidade e a validade do lote
 
     - Attributes:
-        - ingredient_id: str (O id do ingrediente)
-        - validity: date
+        - id:str (O id do ingrediente)
+        - name: str
+        - measure: int
+        - image_path: str | None = None
+        - mark: str | None = None
+        - description: str | None = None
+        - value: float
+        - validity: date | None = None
         - quantity: float
+        - min_quantity: float | None = None
     """
 
-    ingredient_id: str = Field(examples=["1", "2", "3"])
-    validity: datetime.date = Field(
-        examples=["2023-12-31", "2024-01-01", "2024-02-28"]
+    id: str = Field(examples=["1", "2", "3"])
+    image_path: str | None = Field(
+        examples=[
+            "/images/farinha.jpg",
+            "/images/açúcar.jpg",
+            "/images/sal.jpg",
+        ]
     )
-    quantity: float = Field(examples=[10.0, 20.0, 30.0])
 
+
+class IngredientBatchBase(IngredientBase):
+    ingredient_id: str = Field(
+        examples=["1", "2", "3"]
+    )
+    validity: datetime.date = Field(
+        examples=[
+            "2023-12-31", 
+            "2024-01-01", 
+            "2024-02-28"
+        ]
+    )
+    quantity: float = Field(
+        examples=[10.0, 20.0, 30.0]
+    )
+    
+    
     @field_validator("ingredient_id")
     def validate_id_ingredient(cls, v):
         """
@@ -195,55 +212,20 @@ class LoteIngredientRequest(BaseSchema):
                 "A quantidade do lote do ingrediente deve ser maior que zero"
             )
         return v
-
-
-class IngredientResponse(BaseSchema):
+    
+class IngredientBatchRequest(IngredientBatchBase):
     """
-    Essa classe serve para retornar um registro de "Ingredient" com a quantidade e a validade do lote
+    Essa classe serve para cadastrar um registro de "LoteIngredient" no banco de dados
 
     - Attributes:
-        - id:str (O id do ingrediente)
-        - name: str
-        - measure: int
-        - image_path: str | None = None
-        - mark: str | None = None
-        - description: str | None = None
-        - value: float
-        - validity: date | None = None
+        - ingredient_id: str (O id do ingrediente)
+        - validity: date
         - quantity: float
-        - min_quantity: float | None = None
     """
-
-    id: str = Field(examples=["1", "2", "3"])
-    name: str = Field(examples=["Farinha de trigo", "Açúcar", "Sal"])
-    measure: IngredientMeasureEnum = Field(
-        examples=[
-            IngredientMeasureEnum.KG,
-            IngredientMeasureEnum.L,
-            IngredientMeasureEnum.UNITY,
-        ]
-    )
-    image_path: str | None = Field(
-        examples=[
-            "/images/farinha.jpg",
-            "/images/acucar.jpg",
-            "/images/sal.jpg",
-        ]
-    )
-    mark: str | None = Field(examples=["Marca A", "Marca B", "Marca C"])
-    description: str | None = Field(
-        examples=[
-            "Farinha de trigo para bolos",
-            "Açúcar cristal",
-            "Sal refinado",
-        ]
-    )
-    value: float = Field(examples=[1.5, 2.0, 3.0])
-    quantity: float = Field(examples=[10.0, 20.0, 30.0])
-    min_quantity: float | None = Field(examples=[0.5, 1.0, 2.0])
+    pass
 
 
-class LoteIngredientResponse(BaseSchema):
+class LoteIngredientResponse(IngredientBatchBase):
     """
     A schema with data to create a new ingredient on db
 
@@ -255,12 +237,8 @@ class LoteIngredientResponse(BaseSchema):
         register_date (datetime): The register date of the ingredient
     """
 
-    ingredient_id: str = Field(examples=["1", "2", "3"])
+    
     id: str = Field(examples=["1", "2", "3"])
-    quantity: float = Field(examples=[10.0, 20.0, 30.0])
-    validity: datetime.date | None = Field(
-        examples=["2023-12-31", "2024-01-01", "2024-02-28"]
-    )
     register_date: datetime.datetime | None = Field(
         examples=["2023-12-31", "2024-01-01", "2024-02-28"]
     )
