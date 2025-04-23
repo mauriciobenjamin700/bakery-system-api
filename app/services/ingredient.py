@@ -23,13 +23,13 @@ class IngredientService:
     Methods:
         add(request: IngredientRequest) -> IngredientResponse:
             Add a new ingredient to the database.
-        get(ingredient_id: int) -> IngredientResponse:
+        get(ingredient_id: str) -> IngredientResponse:
             Get an ingredient by its ID.
         get_all() -> list[IngredientResponse]:
             Get all ingredients.
-        update(ingredient_id: int, request: IngredientRequest) -> IngredientResponse:
+        update(ingredient_id: str, request: IngredientRequest) -> IngredientResponse:
             Update an ingredient by its ID.
-        delete(ingredient_id: int) -> Message:
+        delete(ingredient_id: str) -> Message:
             Delete an ingredient by its ID.
         add_batch(request: IngredientBatchRequest) -> IngredientBatchResponse:
             Add a new batch of ingredients to the database.
@@ -75,13 +75,13 @@ class IngredientService:
 
     async def get(
         self,
-        ingredient_id: int,
+        ingredient_id: str,
     ) -> IngredientResponse:
         """
         Get an ingredient by its ID.
 
         Args:
-            ingredient_id (int): The ID of the ingredient to retrieve.
+            ingredient_id (str): The ID of the ingredient to retrieve.
 
         Returns:
             IngredientResponse: The retrieved ingredient.
@@ -121,14 +121,14 @@ class IngredientService:
 
     async def update(
         self,
-        ingredient_id: int,
+        ingredient_id: str,
         request: IngredientRequest,
     ) -> IngredientResponse:
         """
         Update an ingredient by its ID.
 
         Args:
-            ingredient_id (int): The ID of the ingredient to update.
+            ingredient_id (str): The ID of the ingredient to update.
             ingredient (IngredientRequest): The updated ingredient data.
 
         Returns:
@@ -156,13 +156,13 @@ class IngredientService:
 
     async def delete(
         self,
-        ingredient_id: int,
+        ingredient_id: str,
     ) -> Message:
         """
         Delete an ingredient by its ID.
 
         Args:
-            ingredient_id (int): The ID of the ingredient to delete.
+            ingredient_id (str): The ID of the ingredient to delete.
 
         Returns:
             IngredientResponse: The deleted ingredient.
@@ -182,7 +182,7 @@ class IngredientService:
         Add a new batch of ingredients to the database.
 
         Args:
-            ingredient_id (int): The ID of the ingredient to add a batch for.
+            ingredient_id (str): The ID of the ingredient to add a batch for.
             batch (IngredientBatchRequest): The batch to be added.
 
         Returns:
