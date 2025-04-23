@@ -118,8 +118,7 @@ class UserRepository:
 
         else:
             raise ValidationError("id", ERROR_REQUIRED_FIELD_ID)
-        
-        
+
     @staticmethod
     def map_request_to_model(request: UserRequest) -> UserModel:
         """
@@ -151,4 +150,3 @@ class UserRepository:
         response = UserResponse(**model.to_dict(exclude=["password"]))
 
         return response
-

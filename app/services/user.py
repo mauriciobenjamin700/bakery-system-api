@@ -7,7 +7,6 @@ from app.core.constants.messages import (
 )
 from app.core.errors import NotFoundError
 from app.core.security.password import hash_password
-from app.db.models import UserModel
 from app.db.repositories.user import UserRepository
 from app.schemas.message import Message
 from app.schemas.user import UserRequest, UserResponse
@@ -90,7 +89,9 @@ class UserService:
 
             raise NotFoundError(ERROR_DATABASE_USERS_NOT_FOUND)
 
-        response = [self.repository.map_model_to_response(model) for model in models]
+        response = [
+            self.repository.map_model_to_response(model) for model in models
+        ]
 
         return response
 
@@ -135,4 +136,3 @@ class UserService:
         await self.repository.delete(id=id)
 
         return Message(detail=MESSAGE_USER_DELETE_SUCCESS)
-    

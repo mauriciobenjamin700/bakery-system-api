@@ -12,6 +12,7 @@ from app.schemas.settings.validators import (
     validate_updated_at,
 )
 
+
 class UserBase(BaseSchema):
     """
     Class to contain data about the user.
@@ -22,26 +23,23 @@ class UserBase(BaseSchema):
         phone (str): The user's phone number.
         email (str): The user's email address.
     """
+
     name: str = Field(
         examples=["John Doe", "Jane Smith"],
         default=None,
-        validate_default=True
+        validate_default=True,
     )
     phone: str = Field(
-        examples=["89912344321"],
-        default=None,
-        validate_default=True
+        examples=["89912344321"], default=None, validate_default=True
     )
     email: str = Field(
-        examples=["test@test.com"],
-        default=None,
-        validate_default=True
+        examples=["test@test.com"], default=None, validate_default=True
     )
-    
-    
+
     _name_validator = validate_name
     _phone_validator = validate_phone
     _email_validator = validate_email
+
 
 class UserRequest(UserBase):
     """
@@ -55,11 +53,8 @@ class UserRequest(UserBase):
     """
 
     password: str = Field(
-        examples=["passWord123@"],
-        default=None,
-        validate_default=True
+        examples=["passWord123@"], default=None, validate_default=True
     )
-
 
     _password_validator = validate_password
 
@@ -79,24 +74,16 @@ class UserResponse(UserBase):
     """
 
     id: str = Field(
-        examples=["89912344321"],
-        default=None,
-        validate_default=True
+        examples=["89912344321"], default=None, validate_default=True
     )
     role: UserRoles = Field(
-        examples=[UserRoles.USER.value],
-        default=None,
-        validate_default=True
+        examples=[UserRoles.USER.value], default=None, validate_default=True
     )
     created_at: str = Field(
-        examples=["2023-10-01 12:00:00"],
-        default=None,
-        validate_default=True
+        examples=["2023-10-01 12:00:00"], default=None, validate_default=True
     )
     updated_at: str = Field(
-        examples=["2023-10-01 12:00:00"],
-        default=None,
-        validate_default=True
+        examples=["2023-10-01 12:00:00"], default=None, validate_default=True
     )
 
     _id_validator = validate_id

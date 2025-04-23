@@ -1,10 +1,16 @@
 from datetime import date
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import BadRequestError, UnprocessableEntityError
-from app.db.models import IngredientModel, IngredientBatchModel
-from app.schemas.ingredient import IngredientBatchResponse, IngredientRequest, IngredientResponse
+from app.db.models import IngredientBatchModel, IngredientModel
+from app.schemas.ingredient import (
+    IngredientBatchRequest,
+    IngredientBatchResponse,
+    IngredientRequest,
+    IngredientResponse,
+)
 
 
 class IngredientRepository:
@@ -23,7 +29,7 @@ class IngredientRepository:
 
     def __init__(self, db_session: AsyncSession) -> None:
         self.db_session = db_session
-    
+
     async def add(self, model: IngredientModel) -> IngredientModel:
         """
         Add a new Ingredient to the database
@@ -44,13 +50,9 @@ class IngredientRepository:
         except Exception as e:
             await self.db_session.rollback()
             raise BadRequestError(str(e))
-        
-    
+
     async def get(
-        self, 
-        id: str = None, 
-        name: str = None, 
-        all_results=False
+        self, id: str = None, name: str = None, all_results=False
     ) -> None | IngredientModel | list[IngredientModel]:
         """
         Get an Ingredient from the database by id or name. If all_results is True, return all results found in the database.
@@ -65,8 +67,7 @@ class IngredientRepository:
         if all_results:
             if name:
                 result = await self.db_session.execute(
-                    select(IngredientModel)
-                    .where(IngredientModel.name == name)
+                    select(IngredientModel).where(IngredientModel.name == name)
                 )
                 return result.unique().scalars().all
             result = await self.db_session.execute(select(IngredientModel))
@@ -74,22 +75,20 @@ class IngredientRepository:
 
         if id:
             result = await self.db_session.execute(
-                select(IngredientModel)
-                .where(IngredientModel.id == id)
+                select(IngredientModel).where(IngredientModel.id == id)
             )
-            
+
             return result.unique().scalars().one_or_none()
 
         if name:
             result = await self.db_session.execute(
-                select(IngredientModel)
-                .where(IngredientModel.name == name)
+                select(IngredientModel).where(IngredientModel.name == name)
             )
-            
+
             return result.unique().scalars().one_or_none()
 
         return None
-    
+
     async def update(self, model: IngredientModel) -> IngredientModel:
         """
         Update an Ingredient in the database
@@ -103,9 +102,10 @@ class IngredientRepository:
         await self.db_session.commit()
         await self.db_session.refresh(model)
         return model
-    
-    
-    async def delete(self, model: IngredientModel = None, id: str = None) -> None:
+
+    async def delete(
+        self, model: IngredientModel = None, id: str = None
+    ) -> None:
         """
         Delete an Ingredient from the database. If model is provided, delete the model. If id is provided, delete the model with the id.
 
@@ -123,18 +123,16 @@ class IngredientRepository:
             stmt = delete(IngredientModel).where(IngredientModel.id == id)
             result = await self.db_session.execute(stmt)
             await self.db_session.commit()
-            
+
             if result.rowcount == 0:
                 raise ConflictError("Ingredient not found")
         else:
             raise UnprocessableEntityError("Ingredient not found")
-    
+
         return None
-    
-    
+
     async def add_batch(
-        self, 
-        model: IngredientBatchModel
+        self, model: IngredientBatchModel
     ) -> IngredientBatchModel:
         """
         Add a new IngredientBatch to the database
@@ -154,13 +152,9 @@ class IngredientRepository:
         except Exception as e:
             await self.db_session.rollback()
             raise BadRequestError(str(e))
-        
-        
+
     async def get_batch(
-        self, 
-        id: str = None, 
-        ingredient_id: str = None, 
-        all_results=False
+        self, id: str = None, ingredient_id: str = None, all_results=False
     ) -> None | IngredientBatchModel | list[IngredientBatchModel]:
         """
         Get an IngredientBatch from the database by id or ingredient_id. If all_results is True, return all results found in the database.
@@ -176,34 +170,38 @@ class IngredientRepository:
         if all_results:
             if ingredient_id:
                 result = await self.db_session.execute(
-                    select(IngredientBatchModel)
-                    .where(IngredientBatchModel.ingredient_id == ingredient_id)
+                    select(IngredientBatchModel).where(
+                        IngredientBatchModel.ingredient_id == ingredient_id
+                    )
                 )
                 return result.unique().scalars().all()
-            result = await self.db_session.execute(select(IngredientBatchModel))
+            result = await self.db_session.execute(
+                select(IngredientBatchModel)
+            )
             return result.unique().scalars().all()
 
         if id:
             result = await self.db_session.execute(
-                select(IngredientBatchModel)
-                .where(IngredientBatchModel.id == id)
+                select(IngredientBatchModel).where(
+                    IngredientBatchModel.id == id
+                )
             )
-            
+
             return result.unique().scalars().one_or_none()
 
         if ingredient_id:
             result = await self.db_session.execute(
-                select(IngredientBatchModel)
-                .where(IngredientBatchModel.ingredient_id == ingredient_id)
+                select(IngredientBatchModel).where(
+                    IngredientBatchModel.ingredient_id == ingredient_id
+                )
             )
-            
+
             return result.unique().scalars().one_or_none()
 
         return None
-    
+
     async def update_batch(
-        self, 
-        model: IngredientBatchModel
+        self, model: IngredientBatchModel
     ) -> IngredientBatchModel:
         """
         Update an IngredientBatch in the database
@@ -217,11 +215,9 @@ class IngredientRepository:
         await self.db_session.commit()
         await self.db_session.refresh(model)
         return model
-    
+
     async def delete_batch(
-        self, 
-        model: IngredientBatchModel = None, 
-        id: str = None
+        self, model: IngredientBatchModel = None, id: str = None
     ) -> None:
         """
         Delete an IngredientBatch from the database. If model is provided, delete the model. If id is provided, delete the model with the id.
@@ -237,63 +233,68 @@ class IngredientRepository:
             await self.db_session.delete(model)
             await self.db_session.commit()
         elif id:
-            stmt = delete(IngredientBatchModel).where(IngredientBatchModel.id == id)
+            stmt = delete(IngredientBatchModel).where(
+                IngredientBatchModel.id == id
+            )
             result = await self.db_session.execute(stmt)
             await self.db_session.commit()
-            
+
             if result.rowcount == 0:
                 raise ConflictError("IngredientBatch not found")
         else:
             raise UnprocessableEntityError("IngredientBatch not found")
-    
+
         return None
-    
-    
+
     @staticmethod
-    def map_request_to_model(request: IngredientRequest, image_path: str) -> IngredientModel:
-        
-        model = IngredientModel(
-            **request.to_dict(),
-            image_path=image_path
-        )
-        
+    def map_request_to_model(
+        request: IngredientRequest, image_path: str
+    ) -> IngredientModel:
+        """
+        Static method to map a IngredientRequest to a IngredientModel
+
+        Args:
+            request (IngredientRequest): The request to be mapped
+            image_path (str): The path to the image of the ingredient
+        Returns:
+            IngredientModel: The mapped model
+        """
+
+        model = IngredientModel(**request.to_dict(), image_path=image_path)
+
         return model
-    
-    async def map_model_to_response(self, model: IngredientModel) -> IngredientResponse:
+
+    async def map_model_to_response(
+        self, model: IngredientModel
+    ) -> IngredientResponse:
         """
         Async method to map a model to a response
-        
+
         Args:
             model (IngredientModel): The model to be mapped
         Returns:
             IngredientResponse: The mapped response
         """
-        
+
         batches = model.ingredients_batch
-        
+
         quantity = 0
-        
+
         batches_response = []
-        
+
         for batch in batches:
             quantity += batch.quantity
-            batches_response.append(
-                self.map_batch_model_to_response(batch)
-            )
-        
+            batches_response.append(self.map_batch_model_to_response(batch))
+
         response = IngredientResponse(
-            **model.to_dict(),
-            quantity=quantity,
-            batches=batches_response
+            **model.to_dict(), quantity=quantity, batches=batches_response
         )
-        
+
         return response
-        
+
     @staticmethod
     def create_ingredient_batch(
-        ingredient_id: str,
-        validity: date,
-        quantity: float
+        ingredient_id: str, validity: date, quantity: float
     ) -> IngredientBatchModel:
         """
         A static method to build a IngredientBatch model by passing the ingredient_id, validity and quantity
@@ -307,15 +308,27 @@ class IngredientRepository:
             IngredientBatchModel: The mapped IngredientBatch model
         """
         return IngredientBatchModel(
-            ingredient_id=ingredient_id,
-            validity=validity,
-            quantity=quantity
+            ingredient_id=ingredient_id, validity=validity, quantity=quantity
         )
-    
-    
+
+    @staticmethod
+    def map_batch_request_to_model(
+        request: IngredientBatchRequest,
+    ) -> IngredientBatchModel:
+        """
+        Map a batch request to a model
+
+        Args:
+            request (IngredientBatchResponse): The request to be mapped
+
+        Returns:
+            IngredientBatchModel: The mapped model
+        """
+        return IngredientBatchModel(**request.to_dict())
+
     @staticmethod
     def map_batch_model_to_response(
-        model: IngredientBatchModel
+        model: IngredientBatchModel,
     ) -> IngredientBatchResponse:
         """
         Map a batch model to a response
@@ -326,6 +339,5 @@ class IngredientRepository:
         Returns:
             IngredientBatchModel: The mapped response
         """
-        return IngredientBatchModel(
-            **model.to_dict()
-        )
+
+        return IngredientBatchResponse(**model.to_dict())
