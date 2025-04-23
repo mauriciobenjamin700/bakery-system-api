@@ -3,13 +3,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.constants.messages import (
     ERROR_DATABASE_USER_NOT_FOUND,
     ERROR_DATABASE_USERS_NOT_FOUND,
+    ERROR_TOKEN_REQUIRED,
     MESSAGE_USER_DELETE_SUCCESS,
 )
-from app.core.errors import NotFoundError
-from app.core.security.password import hash_password
+from app.core.errors import NotFoundError, ValidationError
+from app.core.generate.passwords import generate_random_password
+from app.core.security.password import hash_password, verify_password
+from app.core.security.tokens import TokenManager
 from app.db.repositories.user import UserRepository
 from app.schemas.message import Message
-from app.schemas.user import UserRequest, UserResponse
+from app.schemas.user import (
+    LoginRequest,
+    TokenData,
+    TokenResponse,
+    UserRequest,
+    UserResponse,
+)
 
 
 class UserService:
@@ -136,3 +145,88 @@ class UserService:
         await self.repository.delete(id=id)
 
         return Message(detail=MESSAGE_USER_DELETE_SUCCESS)
+
+    async def login(self, request: LoginRequest) -> TokenResponse:
+        """
+        A method to login a user.
+
+        - Args:
+          - request: UserRequest : A user request object.
+
+        - Returns:
+          - TokenResponse : A TokenResponse objeto with user data and user access token.
+        """
+
+        model = await self.repository.get(email=request.email)
+
+        if not model:
+
+            raise NotFoundError(
+                ERROR_DATABASE_USER_NOT_FOUND, local="services/user/login"
+            )
+
+        if not verify_password(request.password, model.password):
+
+            raise NotFoundError(
+                ERROR_DATABASE_USER_NOT_FOUND, local="services/user/login"
+            )
+
+        response = self.repository.map_model_to_response(model)
+
+        return self.map_response_to_token(response)
+
+    async def refresh_token(self, token: str) -> TokenResponse:
+        """
+        A method to refresh a user's token.
+
+        - Args:
+          - token: str : A user token.
+        - Returns:
+          - TokenResponse : A TokenResponse object with user data and user access token.
+        """
+        if not token:
+            raise ValidationError(
+                "token",
+                ERROR_TOKEN_REQUIRED,
+            )
+        token_data = TokenData(**TokenManager.verify_token(token))
+
+        model = await self.repository.get(id=token_data.user_id)
+
+        if not model:
+
+            raise NotFoundError(
+                ERROR_DATABASE_USER_NOT_FOUND,
+                local="services/user/refresh_token",
+            )
+
+        response = self.repository.map_model_to_response(model)
+
+        return self.map_response_to_token(response)
+
+    async def reset_password(self, email: str) -> str:
+        """
+        Reset a user's password.
+
+        - Args:
+            - email: str : A user email.
+
+        - Returns:
+            - str: new password generated
+        """
+
+        user = await self.repository.get(email=email)
+
+        if user is None:
+            raise NotFoundError(
+                ERROR_DATABASE_USER_NOT_FOUND,
+                local="services/user/reset_password",
+            )
+
+        new_password = generate_random_password()
+
+        user.password = hash_password(new_password)
+
+        await self.repository.update(user)
+
+        return new_password

@@ -61,6 +61,27 @@ class NotFoundError(Exception):
         super().__init__(detail)
 
 
+class UnauthorizedError(Exception):
+    """
+    A class that represents an unauthorized error.
+
+    - Attributes:
+        - status_code: The status code of the error.
+        - detail: The error message.
+    """
+
+    def __init__(self, detail: str):
+        """
+        The constructor for the UnauthorizedError class.
+
+        - Args:
+            - detail: The error message.
+        """
+        self.status_code = 401
+        self.detail = detail
+        super().__init__(detail)
+
+
 class UnprocessableEntityError(Exception):
     """
     A class that represents an unprocessable entity error.

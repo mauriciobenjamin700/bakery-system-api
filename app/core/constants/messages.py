@@ -62,3 +62,8 @@ ERROR_DATABASE_USERS_NOT_FOUND = "Usuários não encontrados"
 
 MESSAGE_USER_ADD_SUCCESS = "Usuário adicionado com sucesso"
 MESSAGE_USER_DELETE_SUCCESS = "Usuário deletado com sucesso"
+
+ERROR_TOKEN_CLAIMS_INVALID = "Token inválido"
+ERROR_TOKEN_EXPIRED = "Token expirado"
+ERROR_TOKEN_REQUIRED = "Token obrigatório"
+ERROR_ACCESS_USER_UNAUTHORIZED = "Usuário não autorizado"

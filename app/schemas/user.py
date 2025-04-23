@@ -89,3 +89,55 @@ class UserResponse(UserBase):
     _id_validator = validate_id
     _created_at_validator = validate_created_at
     _updated_at_validator = validate_updated_at
+
+
+class LoginRequest(BaseSchema):
+    """
+    Class to validate the request body of the user login endpoint.
+
+    Attributes:
+        email (str): The user's email address.
+        password (str): The user's password.
+    """
+
+    email: str = Field(
+        examples=["test@gmai.com"], default=None, validate_default=True
+    )
+    password: str = Field(
+        examples=["passWord123@"], default=None, validate_default=True
+    )
+
+    _email_validator = validate_email
+    _password_validator = validate_password
+
+
+class TokenData(BaseSchema):
+    """
+    Class to contain data about the user token.
+    - Args:
+        - user_id: str,
+        - user_role: UserRoles
+    - Attributes:
+        - user_id: str,
+        - user_role: UserRoles
+    """
+
+    user_id: str = Field(examples=["123456"])
+    user_role: UserRoles = Field(examples=[UserRoles.USER])
+
+
+class TokenResponse(BaseSchema):
+    """
+    Class to contain data about the user token response.
+    - Args:
+        - access_token: str,
+        - user: UserResponse
+    - Attributes:
+        - access_token: str
+        - token_type: str = "bearer"
+        - user: UserResponse
+    """
+
+    access_token: str = Field(examples=["123456"])
+    token_type: str = Field(examples=["bearer"], default="bearer")
+    user: UserResponse
