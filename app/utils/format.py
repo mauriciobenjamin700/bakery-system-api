@@ -10,6 +10,7 @@ def clean_format_name(name: str):
     """
     return name.strip().upper()
 
+
 def clean_format_phone(phone: str):
     """
     Desformata um número de telefone

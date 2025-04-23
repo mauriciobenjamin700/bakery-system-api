@@ -28,19 +28,33 @@ ERROR_DATE_INVALID_FORMAT_MASK = "Data deve ter o formato YYYY-MM-DD HH:MM:SS"
 ERROR_EMAIL_INVALID_FORMAT_TYPE = "Email deve ser uma string"
 ERROR_EMAIL_INVALID_FORMAT_MASK = "Email deve ter um formato válido"
 ERROR_PASSWORD_INVALID_FORMAT_TYPE = "Senha deve ser uma string"
-ERROR_PASSWORD_INVALID_FORMAT_MIN_LENGTH = "Senha deve ter pelo menos 8 caracteres"
-ERROR_PASSWORD_INVALID_FORMAT_MAX_LENGTH = "Senha deve ter no máximo 255 caracteres"
+ERROR_PASSWORD_INVALID_FORMAT_MIN_LENGTH = (
+    "Senha deve ter pelo menos 8 caracteres"
+)
+ERROR_PASSWORD_INVALID_FORMAT_MAX_LENGTH = (
+    "Senha deve ter no máximo 255 caracteres"
+)
 ERROR_PASSWORD_INVALID_FORMAT_DIGIT = "Senha deve ter pelo menos um dígito"
-ERROR_PASSWORD_INVALID_FORMAT_LOWERCASE = "Senha deve ter pelo menos uma letra minúscula"
-ERROR_PASSWORD_INVALID_FORMAT_UPPERCASE = "Senha deve ter pelo menos uma letra maiúscula"
-ERROR_PASSWORD_INVALID_FORMAT_SPECIAL_CHARACTER = "Senha deve ter pelo menos um caractere especial"
+ERROR_PASSWORD_INVALID_FORMAT_LOWERCASE = (
+    "Senha deve ter pelo menos uma letra minúscula"
+)
+ERROR_PASSWORD_INVALID_FORMAT_UPPERCASE = (
+    "Senha deve ter pelo menos uma letra maiúscula"
+)
+ERROR_PASSWORD_INVALID_FORMAT_SPECIAL_CHARACTER = (
+    "Senha deve ter pelo menos um caractere especial"
+)
 ERROR_IS_ADMIN_INVALID_FORMAT_TYPE = "Is Admin deve ser um boolean"
 ERROR_NAME_INVALID_FORMAT_TYPE = "Nome deve ser uma string"
 ERROR_NAME_INVALID_FORMAT_MIN_LENGTH = "Nome deve ter pelo menos 2 caracteres"
 ERROR_PHONE_INVALID_FORMAT_TYPE = "Telefone deve ser uma string"
-ERROR_PHONE_INVALID_FORMAT_LENGTH = "Telefone deve ter pelo menos 11 dígitos no formato (XX) 9XXXX-XXXX"
+ERROR_PHONE_INVALID_FORMAT_LENGTH = (
+    "Telefone deve ter pelo menos 11 dígitos no formato (XX) 9XXXX-XXXX"
+)
 ERROR_USERNAME_INVALID_FORMAT_TYPE = "Nome de usuário deve ser uma string"
-ERROR_USERNAME_INVALID_FORMAT_MIN_LENGTH = "Nome de usuário deve ter pelo menos 2 caracteres sem espaços"
+ERROR_USERNAME_INVALID_FORMAT_MIN_LENGTH = (
+    "Nome de usuário deve ter pelo menos 2 caracteres sem espaços"
+)
 
 ERROR_DATABASE_USER_ALREADY_EXISTS = "Usuário já existe"
 ERROR_DATABASE_USER_NOT_FOUND = "Usuário não encontrado"

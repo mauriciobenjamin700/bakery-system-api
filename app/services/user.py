@@ -1,16 +1,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.constants.enums.user import UserRoles
-from app.core.constants.messages import ERROR_DATABASE_USER_NOT_FOUND, ERROR_DATABASE_USERS_NOT_FOUND, MESSAGE_USER_DELETE_SUCCESS
+from app.core.constants.messages import (
+    ERROR_DATABASE_USER_NOT_FOUND,
+    ERROR_DATABASE_USERS_NOT_FOUND,
+    MESSAGE_USER_DELETE_SUCCESS,
+)
 from app.core.errors import NotFoundError
 from app.core.security.password import hash_password
-from app.db.models import UserModel
 from app.db.repositories.user import UserRepository
 from app.schemas.message import Message
-from app.schemas.user import (
-    UserRequest,
-    UserResponse
-)
+from app.schemas.user import UserRequest, UserResponse
 
 
 class UserService:
@@ -28,13 +27,11 @@ class UserService:
       - get_all: Get all users from the database.
       - update: Update a user in the database.
       - delete: Delete a user from the database.
-      - map_request_to_model: Map a user request to a user model.
-      - map_model_to_response: Map a user model to a user response.
 
     """
+
     def __init__(self, db_session: AsyncSession):
         self.repository = UserRepository(db_session)
-
 
     async def add(self, request: UserRequest) -> UserResponse:
         """
@@ -49,14 +46,13 @@ class UserService:
 
         request.password = hash_password(request.password)
 
-        model = self.map_request_to_model(request)
+        model = self.repository.map_request_to_model(request)
 
         model = await self.repository.add(model)
 
-        response = self.map_model_to_response(model)
+        response = self.repository.map_model_to_response(model)
 
         return response
-
 
     async def get_by_id(self, user_id: str) -> UserResponse:
         """
@@ -74,10 +70,9 @@ class UserService:
 
             raise NotFoundError(ERROR_DATABASE_USER_NOT_FOUND)
 
-        response = self.map_model_to_response(model)
+        response = self.repository.map_model_to_response(model)
 
         return response
-
 
     async def get_all(self) -> list[UserResponse]:
         """
@@ -94,12 +89,22 @@ class UserService:
 
             raise NotFoundError(ERROR_DATABASE_USERS_NOT_FOUND)
 
-        response = [self.map_model_to_response(model) for model in models]
+        response = [
+            self.repository.map_model_to_response(model) for model in models
+        ]
 
         return response
 
     async def update(self, id: str, request: UserRequest):
+        """
+        Update a user in the database.
 
+        Args
+            id (str): The id of the user to update.
+            request (UserRequest): The user request object containing the updated data.
+        Returns
+            UserResponse: The updated user response object.
+        """
         model = await self.repository.get(id=id)
 
         if not model:
@@ -114,7 +119,7 @@ class UserService:
 
         model = await self.repository.update(model)
 
-        response = self.map_model_to_response(model)
+        response = self.repository.map_model_to_response(model)
 
         return response
 
@@ -131,47 +136,3 @@ class UserService:
         await self.repository.delete(id=id)
 
         return Message(detail=MESSAGE_USER_DELETE_SUCCESS)
-
-
-    @classmethod
-    def map_request_to_model(cls, request: UserRequest) -> UserModel:
-        """
-        A method to map a user request to a user model.
-
-        - Args:
-            - request: UserRequest : A user request object.
-
-        - Returns:
-            - model: UserModel : A user model object.
-        """
-        model = UserModel(
-            **request.to_dict(
-                include={
-                    "role": UserRoles.USER.value
-                }
-            )
-        )
-
-        return model
-
-
-    @classmethod
-    def map_model_to_response(cls, model: UserModel) -> UserResponse:
-        """
-        A method to map a user model to a user response.
-
-        - Args:
-            - model: UserModel : A user model object.
-
-        - Returns:
-            - response: UserResponse : A user response object.
-        """
-        response = UserResponse(
-            **model.to_dict(
-                exclude=[
-                    "password"
-                ]
-            )
-        )
-
-        return response

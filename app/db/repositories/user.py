@@ -1,20 +1,15 @@
-from sqlalchemy import (
-    delete,
-    select
-)
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants.enums.user import UserRoles
 from app.core.constants.messages import (
     ERROR_DATABASE_USER_ALREADY_EXISTS,
     ERROR_DATABASE_USER_NOT_FOUND,
-    ERROR_REQUIRED_FIELD_ID
+    ERROR_REQUIRED_FIELD_ID,
 )
-from app.core.errors import (
-    ConflictError,
-    NotFoundError,
-    ValidationError
-)
+from app.core.errors import ConflictError, NotFoundError, ValidationError
 from app.db.models import UserModel
+from app.schemas.user import UserRequest, UserResponse
 
 
 class UserRepository:
@@ -30,9 +25,9 @@ class UserRepository:
         - update: Update a User in the database
         - delete: Delete a User from the database
     """
+
     def __init__(self, db_session: AsyncSession) -> None:
         self.db_session = db_session
-
 
     async def add(self, model: UserModel) -> UserModel:
         """
@@ -52,12 +47,13 @@ class UserRepository:
             return model
 
         except Exception as e:
-            print("USER REPOSITORY ADD ERROR: ",e)
+            print("USER REPOSITORY ADD ERROR: ", e)
             await self.db_session.rollback()
             raise ConflictError(ERROR_DATABASE_USER_ALREADY_EXISTS)
 
-
-    async def get(self, id: str = None, email: str = None, all_results = False) -> None | UserModel | list[UserModel]:
+    async def get(
+        self, id: str = None, email: str = None, all_results=False
+    ) -> None | UserModel | list[UserModel]:
         """
         Get a User from the database by id or email. If all_results is True, return all results found in the database.
 
@@ -84,7 +80,6 @@ class UserRepository:
 
         return result.scalars().first()
 
-
     async def update(self, model: UserModel) -> UserModel:
         """
         Update a User in the database
@@ -98,7 +93,6 @@ class UserRepository:
         await self.db_session.commit()
         await self.db_session.refresh(model)
         return model
-
 
     async def delete(self, model: UserModel = None, id: str = None) -> None:
         """
@@ -123,4 +117,36 @@ class UserRepository:
                 raise NotFoundError(ERROR_DATABASE_USER_NOT_FOUND)
 
         else:
-            raise ValidationError("id",ERROR_REQUIRED_FIELD_ID)
+            raise ValidationError("id", ERROR_REQUIRED_FIELD_ID)
+
+    @staticmethod
+    def map_request_to_model(request: UserRequest) -> UserModel:
+        """
+        A method to map a user request to a user model.
+
+        - Args:
+            - request: UserRequest : A user request object.
+
+        - Returns:
+            - model: UserModel : A user model object.
+        """
+        model = UserModel(
+            **request.to_dict(include={"role": UserRoles.USER.value})
+        )
+
+        return model
+
+    @staticmethod
+    def map_model_to_response(model: UserModel) -> UserResponse:
+        """
+        A method to map a user model to a user response.
+
+        - Args:
+            - model: UserModel : A user model object.
+
+        - Returns:
+            - response: UserResponse : A user response object.
+        """
+        response = UserResponse(**model.to_dict(exclude=["password"]))
+
+        return response
