@@ -11,7 +11,7 @@ from app.schemas.user import TokenData, UserResponse
 from app.services.user import UserService
 
 
-async def employer_permissions(
+async def employer_permission(
     token: str = Depends(oauth_access),
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
@@ -36,7 +36,7 @@ async def employer_permissions(
     return user
 
 
-def user_permissions(user_id: str, user: UserResponse) -> None:
+def user_permission(user_id: str, user: UserResponse) -> None:
     """
     Function to Check if the user has user permissions to access the resource. User can only access your resources. Like your account and your data.
 
@@ -62,7 +62,7 @@ def user_permissions(user_id: str, user: UserResponse) -> None:
     return user
 
 
-async def admin_permissions(
+async def admin_permission(
     token: str = Depends(oauth_access),
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:

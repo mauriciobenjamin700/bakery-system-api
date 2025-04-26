@@ -3,7 +3,6 @@ from datetime import date, datetime
 from sqlalchemy import (
     TIMESTAMP,
     Date,
-    DateTime,
     Enum,
     Float,
     ForeignKey,
@@ -56,12 +55,16 @@ class UserModel(Base):
     password: Mapped[str] = mapped_column(String, nullable=False)
     role: Mapped[str] = mapped_column(Enum(UserRoles), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP, nullable=False, server_default=func.now()
+        TIMESTAMP,
+        nullable=False,
+        server_default=func.now(),
+        default=datetime.now,
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP,
         nullable=False,
         server_default=func.now(),
+        default=datetime.now,
         onupdate=func.now(),
     )
 
@@ -74,9 +77,9 @@ class IngredientModel(Base):
         id (str): The unique identifier for the ingredient.
         name (str): The name of the ingredient.
         measure (str): The unit of measure for the ingredient.
-        image_path (str): The path to the ingredient image.
-        mark (str): The brand or mark of the ingredient.
-        description (str): A description of the ingredient.
+        image_path (str | None): The path to the ingredient image.
+        mark (str | None): The brand or mark of the ingredient.
+        description (str | None): A description of the ingredient.
         value (float): The value of the ingredient.
         min_quantity (float): The minimum quantity of the ingredient.
         created_at (datetime): The date and time when the ingredient was created.
@@ -99,10 +102,15 @@ class IngredientModel(Base):
     value: Mapped[float] = mapped_column(Float, nullable=False)
     min_quantity: Mapped[float] = mapped_column(Float, default=0)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now
+        TIMESTAMP,
+        server_default=func.now(),
+        default=datetime.now,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now, onupdate=func.now
+        TIMESTAMP,
+        server_default=func.now(),
+        default=datetime.now,
+        onupdate=datetime.now,
     )
 
     ingredients_batch = relationship(
@@ -144,10 +152,17 @@ class IngredientBatchModel(Base):
     validity: Mapped[date] = mapped_column(TIMESTAMP, nullable=True)
     quantity: Mapped[float] = mapped_column(Float, default=0)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now
+        TIMESTAMP,
+        nullable=False,
+        server_default=func.now(),
+        default=datetime.now,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now, onupdate=func.now
+        TIMESTAMP,
+        nullable=False,
+        server_default=func.now(),
+        default=datetime.now,
+        onupdate=func.now(),
     )
 
     ingredient = relationship(
@@ -190,10 +205,17 @@ class ProductModel(Base):
     mark: Mapped[str] = mapped_column(String, nullable=True)
     min_quantity: Mapped[float] = mapped_column(Float, default=0)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now
+        TIMESTAMP,
+        nullable=False,
+        server_default=func.now(),
+        default=datetime.now,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now, onupdate=func.now
+        TIMESTAMP,
+        nullable=False,
+        server_default=func.now(),
+        default=datetime.now,
+        onupdate=func.now(),
     )
 
     products_batch = relationship(
@@ -268,12 +290,18 @@ class ProductBatchModel(Base):
     validity: Mapped[date] = mapped_column(Date, nullable=True)
     quantity: Mapped[float] = mapped_column(Float, default=0)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now
+        TIMESTAMP,
+        nullable=False,
+        server_default=func.now(),
+        default=datetime.now,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now, onupdate=func.now
+        TIMESTAMP,
+        nullable=False,
+        server_default=func.now(),
+        default=datetime.now,
+        onupdate=func.now(),
     )
-
     product = relationship(
         "ProductModel", back_populates="products_batch", uselist=False
     )

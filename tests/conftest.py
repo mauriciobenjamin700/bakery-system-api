@@ -1,10 +1,13 @@
 from fastapi.testclient import TestClient
 from pytest import fixture
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants.enums.ingredient import IngredientMeasureEnum
 from app.core.constants.enums.user import UserRoles
 from app.core.security.password import hash_password
 from app.core.settings import config
 from app.db.configs.connection import AsyncDatabaseManager
+from app.db.models import UserModel
 from app.main import app
 
 
@@ -48,3 +51,31 @@ def mock_user_model():
         "password" : hash_password("SafePassword123@"),
         "role": UserRoles.USER.value
     }
+
+@fixture
+def mock_ingredient_model():
+    return {
+        "name": "Tomato",
+        "measure": IngredientMeasureEnum.KG.value,
+        "image_path": "https://example.com/tomato.jpg",
+        "mark": "Fresh",
+        "description": "Fresh and ripe tomatoes",
+        "value": 3.5,
+        "min_quantity": 10
+    }
+
+
+@fixture
+def mock_user_employer_on_db_by_api(
+    mock_api: TestClient,
+    mock_user_request
+):
+
+    api = mock_api
+    
+    response = api.post(
+        "/user/",
+        json=mock_user_request
+    )
+    
+    

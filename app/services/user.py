@@ -161,15 +161,11 @@ class UserService:
 
         if not model:
 
-            raise NotFoundError(
-                ERROR_DATABASE_USER_NOT_FOUND, local="services/user/login"
-            )
+            raise NotFoundError(ERROR_DATABASE_USER_NOT_FOUND)
 
         if not verify_password(request.password, model.password):
 
-            raise NotFoundError(
-                ERROR_DATABASE_USER_NOT_FOUND, local="services/user/login"
-            )
+            raise NotFoundError(ERROR_DATABASE_USER_NOT_FOUND)
 
         response = self.repository.map_model_to_response(model)
 
@@ -195,10 +191,7 @@ class UserService:
 
         if not model:
 
-            raise NotFoundError(
-                ERROR_DATABASE_USER_NOT_FOUND,
-                local="services/user/refresh_token",
-            )
+            raise NotFoundError(ERROR_DATABASE_USER_NOT_FOUND)
 
         response = self.repository.map_model_to_response(model)
 
@@ -230,3 +223,26 @@ class UserService:
         await self.repository.update(user)
 
         return new_password
+
+    @staticmethod
+    def map_response_to_token(response: UserResponse) -> TokenResponse:
+        """
+        A method to map a user response to a token response.
+
+        - Args:
+            - response: UserResponse : A user response object.
+
+        - Returns:
+            - TokenResponse : A token response object.
+        """
+
+        return TokenResponse(
+            access_token=TokenManager.create_access_token(
+                data={
+                    "user_id": response.id,
+                    "role": response.role.value,
+                }
+            ),
+            token_type="bearer",
+            user=response,
+        )

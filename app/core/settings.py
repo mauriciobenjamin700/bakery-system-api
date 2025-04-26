@@ -50,9 +50,9 @@ class Settings(BaseSettings):
         default=60,
     )
     TOKEN_SECRET_KEY: str = Field(
-        title="Chave secreta do token", 
-        description="Chave secreta do token", 
-        default="your_secret_key"
+        title="Chave secreta do token",
+        description="Chave secreta do token",
+        default="your_secret_key",
     )
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)

@@ -122,18 +122,10 @@ class TokenManager:
             return payload
 
         except jwt.ExpiredSignatureError:
-            raise UnauthorizedError(
-                ERROR_TOKEN_EXPIRED, local="core/security/tokens/verify_token"
-            )
+            raise UnauthorizedError(ERROR_TOKEN_EXPIRED)
 
         except jwt.JWTClaimsError:
-            raise UnauthorizedError(
-                ERROR_TOKEN_CLAIMS_INVALID,
-                local="core/security/tokens/verify_token",
-            )
+            raise UnauthorizedError(ERROR_TOKEN_CLAIMS_INVALID)
 
         except JWTError as e:
-            raise UnauthorizedError(
-                f"Token inválido: {e}",
-                local="core/security/tokens/verify_token",
-            )
+            raise UnauthorizedError(f"Token inválido: {e}")

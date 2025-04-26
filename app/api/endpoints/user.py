@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies.db import get_session
-from app.api.dependencies.permissions import (
-    admin_permissions,
-    employer_permissions,
-    user_permissions,
+from app.api.dependencies import (
+    admin_permission,
+    employer_permission,
+    get_session,
+    user_permission,
 )
 from app.schemas.user import (
     LoginRequest,
@@ -40,7 +40,7 @@ async def add_user(
 
 @router.get("/")
 async def get_users(
-    _: UserResponse = Depends(admin_permissions),
+    _: UserResponse = Depends(admin_permission),
     session: AsyncSession = Depends(get_session),
 ) -> list[UserResponse]:
     """
@@ -59,7 +59,7 @@ async def get_users(
 @router.get("/{user_id}")
 async def get_user(
     user_id: str,
-    user: UserResponse = Depends(employer_permissions),
+    user: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
@@ -71,7 +71,7 @@ async def get_user(
         UserResponse: The response object containing the user data.
     """
 
-    user_permissions(user_id=user_id, user=user)
+    user_permission(user_id=user_id, user=user)
 
     service = UserService(session)
     user = await service.get_by_id(user_id)
@@ -82,7 +82,7 @@ async def get_user(
 async def update_user(
     user_id: str,
     request: UserRequest,
-    user: UserResponse = Depends(employer_permissions),
+    user: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
@@ -95,7 +95,7 @@ async def update_user(
         UserResponse: The response object containing the updated user data.
     """
 
-    user_permissions(user_id=user_id, user=user)
+    user_permission(user_id=user_id, user=user)
 
     service = UserService(session)
     user = await service.update(user_id, request)
@@ -105,7 +105,7 @@ async def update_user(
 @router.delete("/{user_id}")
 async def delete_user(
     user_id: str,
-    user: UserResponse = Depends(employer_permissions),
+    user: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
@@ -117,7 +117,7 @@ async def delete_user(
         UserResponse: The response object containing the deleted user data.
     """
 
-    user_permissions(user_id=user_id, user=user)
+    user_permission(user_id=user_id, user=user)
 
     service = UserService(session)
     user = await service.delete_by_id(user_id)
