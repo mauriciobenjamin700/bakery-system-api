@@ -34,7 +34,7 @@ class IngredientBase(BaseSchema):
         default=None,
         validate_default=True,
     )
-    mark: str = Field(
+    mark: str | None = Field(
         examples=["Marca A", "Marca B", "Marca C"],
         default=None,
         validate_default=True,
@@ -65,12 +65,12 @@ class IngredientRequest(IngredientBase):
 
     Attributes:
         name (str): The name of the ingredient
-        measure (int): The measure of the ingredient
+        measure (IngredientMeasureEnum): The measure of the ingredient
         mark (str): The mark of the ingredient
         description (str): The description of the ingredient
         value (float): The value of the ingredient
         min_quantity (float): The minimum quantity of the ingredient
-        validity (date): The validity of the ingredient
+        validity (date | None): The validity of the ingredient
         quantity (float): The quantity of the ingredient
     """
 
@@ -136,14 +136,15 @@ class IngredientBatchBase(IngredientBase):
 
     Attributes:
         ingredient_id (str): The id of the ingredient
-        validity (date): The validity of the ingredient
+        validity (date | None): The validity of the ingredient
         quantity (float): The quantity of the ingredient
 
     """
 
     ingredient_id: str = Field(examples=["1", "2", "3"])
-    validity: datetime.date = Field(
-        examples=["2023-12-31", "2024-01-01", "2024-02-28"]
+    validity: datetime.date | None = Field(
+        examples=["2023-12-31", "2024-01-01", "2024-02-28"],
+        default=None
     )
     quantity: float = Field(examples=[10.0, 20.0, 30.0])
 
@@ -252,6 +253,7 @@ class IngredientResponse(IngredientBase):
             "/images/farinha.jpg",
             "/images/açúcar.jpg",
             "/images/sal.jpg",
-        ]
+        ],
+        default=None
     )
     batches: list[IngredientBatchResponse]
