@@ -2,10 +2,15 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.db import get_session
-from app.schemas.ingredient import IngredientBatchRequest, IngredientRequest, IngredientResponse
+from app.api.dependencies.permissions import employer_permission
+from app.schemas.ingredient import (
+    IngredientBatchRequest,
+    IngredientRequest,
+    IngredientResponse,
+)
 from app.schemas.message import Message
+from app.schemas.user import UserResponse
 from app.services.ingredient import IngredientService
-
 
 router = APIRouter(prefix="/ingredient", tags=["Ingredient"])
 
@@ -13,6 +18,7 @@ router = APIRouter(prefix="/ingredient", tags=["Ingredient"])
 @router.post("/", status_code=201)
 async def add_ingredient(
     request: IngredientRequest,
+    _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
@@ -32,6 +38,7 @@ async def add_ingredient(
 @router.get("/", response_model=list[IngredientResponse])
 async def get_ingredients(
     ingredient_id: str | None = None,
+    _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> list[IngredientResponse]:
     """
@@ -54,6 +61,7 @@ async def get_ingredients(
 async def update_ingredient(
     ingredient_id: str,
     request: IngredientRequest,
+    _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
@@ -74,6 +82,7 @@ async def update_ingredient(
 @router.delete("/{ingredient_id}", status_code=200)
 async def delete_ingredient(
     ingredient_id: str,
+    _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> Message:
     """
@@ -90,9 +99,10 @@ async def delete_ingredient(
     return response
 
 
-@router.post("/batch/", status_code=201)
+@router.post("/batch", status_code=201)
 async def add_ingredient_batch(
     request: IngredientBatchRequest,
+    _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
@@ -113,6 +123,7 @@ async def add_ingredient_batch(
 async def update_ingredient_batch(
     batch_id: str,
     request: IngredientBatchRequest,
+    _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
@@ -133,6 +144,7 @@ async def update_ingredient_batch(
 @router.delete("/batch/{batch_id}", status_code=200)
 async def delete_ingredient_batch(
     batch_id: str,
+    _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> Message:
     """

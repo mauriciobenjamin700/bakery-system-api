@@ -39,6 +39,21 @@ class Settings(BaseSettings):
         description="URL do banco de dados de teste",
         default="sqlite+aiosqlite:///:memory:",
     )
+    TOKEN_ALGORITHM: str = Field(
+        title="Algoritmo de criptografia do token",
+        description="Algoritmo de criptografia do token",
+        default="HS256",
+    )
+    TOKEN_EXPIRES_IN_MINUTES: int = Field(
+        title="Tempo de expiração do token",
+        description="Tempo de expiração do token",
+        default=60,
+    )
+    TOKEN_SECRET_KEY: str = Field(
+        title="Chave secreta do token",
+        description="Chave secreta do token",
+        default="your_secret_key",
+    )
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 

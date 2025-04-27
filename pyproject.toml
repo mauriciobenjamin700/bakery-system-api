@@ -13,6 +13,8 @@ dependencies = [
     "pydantic>=2.10.6",
     "pydantic-settings>=2.8.1",
     "python-decouple>=3.8",
+    "python-jose>=3.4.0",
+    "python-multipart>=0.0.20",
     "pyyaml>=6.0.2",
     "sqlalchemy>=2.0.39",
     "uvicorn>=0.34.0",
@@ -40,9 +42,9 @@ lint.select = [
     "D102",  # Métodos públicos devem ter docstring
     "D103",  # Funções públicas devem ter docstring
 ]
+lint.fixable = ["E302", "E305", "F401"]  # Adicione regras que podem ser corrigidas automaticamente
 line-length = 79
 preview = true
-lint.fixable = ["E302", "E305", "F401"]  # Adicione regras que podem ser corrigidas automaticamente
 
 
 [tool.isort]
