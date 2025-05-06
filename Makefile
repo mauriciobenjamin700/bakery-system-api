@@ -25,7 +25,7 @@ run-migrations:
 rollback-migrations:
 	@PYTHONPATH=$PYTHONPATH:$(pwd) alembic downgrade $(id)
 
-start: fix
+start:
 	@docker compose -f $(DOCKER_COMPOSE_FILE) up --build -d
 
 stop:

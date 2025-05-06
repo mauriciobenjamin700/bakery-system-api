@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.endpoints.ingredient import router as ingredient_router
+from app.api.endpoints.product import router as product_router
 from app.api.endpoints.user import router as user_router
 from app.api.middlewares.error import CustomErrorMiddleware
 
@@ -49,8 +50,9 @@ async def validation_exception_handler(
 
 
 # Incluindo os roteadores
-app.include_router(user_router)
 app.include_router(ingredient_router)
+app.include_router(product_router)
+app.include_router(user_router)
 
 
 @app.get("/")
