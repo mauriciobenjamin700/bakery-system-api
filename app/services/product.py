@@ -55,7 +55,7 @@ class ProductService:
     def __init__(self, session: AsyncSession):
         self.repository = ProductRepository(session)
 
-    async def add_product(self, request: ProductRequest) -> ProductResponse:
+    async def add(self, request: ProductRequest) -> ProductResponse:
         """
         Add a new product to the database.
 
@@ -84,7 +84,7 @@ class ProductService:
 
         return response
 
-    async def get_product_by_id(self, product_id: str) -> ProductResponse:
+    async def get_by_id(self, product_id: str) -> ProductResponse:
         """
         Get a product by its ID.
 
@@ -107,7 +107,7 @@ class ProductService:
 
         return response
 
-    async def get_all_products(self) -> list[ProductResponse]:
+    async def get_all(self) -> list[ProductResponse]:
         """
         Get all products from the database.
 
@@ -128,7 +128,7 @@ class ProductService:
 
         return response
 
-    async def update_product(
+    async def update(
         self, product_id: str, request: ProductUpdate
     ) -> ProductResponse:
         """
@@ -159,7 +159,7 @@ class ProductService:
 
         return response
 
-    async def delete_product(self, product_id: str) -> None:
+    async def delete(self, product_id: str) -> Message:
         """
         Delete a product from the database.
 
