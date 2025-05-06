@@ -242,6 +242,7 @@ class PortionModel(Base):
         quantity (float): The quantity of the ingredient in the portion.
         product_id (str): The unique identifier for the product.
         ingredient (IngredientModel): The ingredient associated with the portion.
+        product (ProductModel): The product associated with the portion.
     """
 
     __tablename__ = "portions"

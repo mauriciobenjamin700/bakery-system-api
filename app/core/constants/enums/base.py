@@ -27,3 +27,18 @@ class BaseEnum(str, Enum):
             - list: A list of the keys of the Enum.
         """
         return [item.name for item in self.__class__]
+
+
+class MeasureEnum(BaseEnum):
+    """
+    Enum for product measures.
+
+    - Attributes:
+        - KG: str = "kg"
+        - L: str = "l"
+        - UNITY: str = "un"
+    """
+
+    KG = "kg"
+    L = "l"
+    UNITY = "u"

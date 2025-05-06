@@ -143,8 +143,7 @@ class IngredientBatchBase(IngredientBase):
 
     ingredient_id: str = Field(examples=["1", "2", "3"])
     validity: datetime.date | None = Field(
-        examples=["2023-12-31", "2024-01-01", "2024-02-28"],
-        default=None
+        examples=["2023-12-31", "2024-01-01", "2024-02-28"], default=None
     )
     quantity: float = Field(examples=[10.0, 20.0, 30.0])
 
@@ -254,6 +253,6 @@ class IngredientResponse(IngredientBase):
             "/images/açúcar.jpg",
             "/images/sal.jpg",
         ],
-        default=None
+        default=None,
     )
     batches: list[IngredientBatchResponse]
