@@ -1,6 +1,4 @@
-# Variáveis
-#DOCKER_COMPOSE_FILE=../docker-compose.yaml
-DOCKER_COMPOSE_FILE=docker-compose.yaml
+DOCKER_COMPOSE_FILE=../docker-compose.yaml
 
 lint:
 	ruff check app/
@@ -8,8 +6,8 @@ lint:
 	black --check app/
 
 lint-fix:
-	ruff check --fix app/  # Corrige erros detectados pelo Ruff
-	isort app/             # Organiza imports
+	ruff check --fix app/
+	isort app/
 	black app/     
 
 pre-commit:

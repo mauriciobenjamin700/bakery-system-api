@@ -1,7 +1,7 @@
 [project]
-name = "template-api-fastapi"
+name = "bakery-system-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "Simple API for bakery system"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

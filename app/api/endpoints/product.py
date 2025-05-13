@@ -25,13 +25,14 @@ async def add_product(
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
-    A route to add a product.
+    # A route to add a product.
 
-    Args:
-        request (ProductRequest): The request object containing product data.
-        session (AsyncSession): The database session.
-    Returns:
-        ProductResponse: The response object containing the added product data.
+    ## Args:
+        - request (ProductRequest): The request object containing product data.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - ProductResponse: The response object containing the added product data.
     """
     service = ProductService(session)
     response = await service.add(request)
@@ -45,12 +46,14 @@ async def get_products(
     session: AsyncSession = Depends(get_session),
 ) -> list[ProductResponse]:
     """
-    A route to get all products.
+    # A route to get all products.
 
-    Args:
-        session (AsyncSession): The database session.
-    Returns:
-        list[ProductResponse]: A list of product response objects.
+    ## Args:
+        - product_id (str | None): The ID of the product to retrieve.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - list[ProductResponse]: A list of product response objects.
     """
     service = ProductService(session)
     if product_id:
@@ -68,14 +71,15 @@ async def update_product(
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
-    A route to update a product.
+    # A route to update a product.
 
-    Args:
-        product_id (str): The ID of the product to update.
-        request (ProductUpdate): The request object containing updated product data.
-        session (AsyncSession): The database session.
-    Returns:
-        ProductResponse: The response object containing the updated product data.
+    ## Args:
+        - product_id (str): The ID of the product to update.
+        - request (ProductUpdate): The request object containing updated product data.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - ProductResponse: The response object containing the updated product data.
     """
     service = ProductService(session)
     response = await service.update(product_id, request)
@@ -89,12 +93,13 @@ async def delete_product(
     session: AsyncSession = Depends(get_session),
 ) -> Message:
     """
-    A route to delete a product.
+    # A route to delete a product.
 
-    Args:
-        product_id (str): The ID of the product to delete.
-        session (AsyncSession): The database session.
-    Returns:
+    ## Args:
+        - product_id (str): The ID of the product to delete.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
         None
     """
     service = ProductService(session)
@@ -109,13 +114,14 @@ async def add_product_batch(
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
-    A route to add a batch of products.
+    # A route to add a batch of products.
 
-    Args:
-        request (ProductBatchRequest): The request object containing product data.
-        session (AsyncSession): The database session.
-    Returns:
-        list[ProductResponse]: A list of response objects containing the added product data.
+    ## Args:
+        - request (ProductBatchRequest): The request object containing product data.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - list[ProductResponse]: A list of response objects containing the added product data.
     """
     service = ProductService(session)
     response = await service.add_product_batch(request)
@@ -130,13 +136,13 @@ async def update_product_batch(
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
-    A route to update a batch of products.
+    # A route to update a batch of products.
 
-    Args:
-        request (ProductBatchUpdate): The request object containing updated product data.
-        session (AsyncSession): The database session.
-    Returns:
-        Message: A message indicating the result of the operation.
+    ## Args:
+        - request (ProductBatchUpdate): The request object containing updated product data.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - Message: A message indicating the result of the operation.
     """
     service = ProductService(session)
     response = await service.update_product_batch(product_batch_id, request)
@@ -150,13 +156,14 @@ async def delete_product_batch(
     session: AsyncSession = Depends(get_session),
 ) -> Message:
     """
-    A route to delete a batch of products.
+    # A route to delete a batch of products.
 
-    Args:
-        product_batch_id (str): The ID of the product batch to delete.
-        session (AsyncSession): The database session.
-    Returns:
-        Message: A message indicating the result of the operation.
+    ## Args:
+        - product_batch_id (str): The ID of the product batch to delete.
+        _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - Message: A message indicating the result of the operation.
     """
     service = ProductService(session)
     response = await service.delete_product_batch(product_batch_id)
@@ -170,13 +177,14 @@ async def add_recipe(
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
-    A route to add a recipe.
+    # A route to add a recipe.
 
-    Args:
-        request (RecipeRequest): The request object containing recipe data.
-        session (AsyncSession): The database session.
-    Returns:
-        ProductResponse: The response object containing the added recipe data.
+    ## Args:
+        - request (RecipeRequest): The request object containing recipe data.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - ProductResponse: The response object containing the added recipe data.
     """
     service = ProductService(session)
     response = await service.add_recipe(request)
@@ -191,14 +199,15 @@ async def update_recipe(
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
-    A route to update a recipe.
+    # A route to update a recipe.
 
-    Args:
-        recipe_id (str): The ID of the recipe to update.
-        quantity (float): The new quantity for the recipe.
-        session (AsyncSession): The database session.
-    Returns:
-        ProductResponse: The response object containing the updated recipe data.
+    ## Args:
+        - portion_id (str): The ID of the recipe to update.
+        - quantity (float): The new quantity for the recipe.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - ProductResponse: The response object containing the updated recipe data.
     """
     service = ProductService(session)
     response = await service.update_recipe(portion_id, quantity)
@@ -212,13 +221,14 @@ async def delete_recipe(
     session: AsyncSession = Depends(get_session),
 ) -> Message:
     """
-    A route to delete a recipe.
+    # A route to delete a recipe.
 
-    Args:
-        recipe_id (str): The ID of the recipe to delete.
-        session (AsyncSession): The database session.
-    Returns:
-        Message: A message indicating the result of the operation.
+    ## Args:
+        - recipe_id (str): The ID of the recipe to delete.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - Message: A message indicating the result of the operation.
     """
     service = ProductService(session)
     response = await service.delete_recipe(recipe_id)
