@@ -86,7 +86,7 @@ async def cancel_sale_note(
         - session (AsyncSession): The database session.
         - _ (UserResponse): The user making the request.
     ## Returns:
-        - SaleNoteResponse: The response object containing the canceled sale note data.
+        -SaleNoteResponse: The response object containing the canceled sale note data.
     """
     service = SaleService(session)
     response = await service.cancel_sale_note(sale_code)
