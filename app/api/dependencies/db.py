@@ -13,15 +13,15 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """
 
     if "pytest" in sys.modules:
-        test_db = AsyncDatabaseManager(config.TEST_DB_URL)
+
+        test_db = AsyncDatabaseManager(config.DB_URL_TEST)
+
         test_db.connect()
+
         await test_db.create_tables()
-        async with test_db as session:
 
+        session = await test_db.get_session()
+    else:
+        async with db as session:
+            session = await db.get_session()
             yield session
-
-        await test_db.drop_tables()
-        await session.close()
-
-    async with db as session:
-        yield session

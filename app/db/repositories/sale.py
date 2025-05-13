@@ -227,9 +227,9 @@ class SaleRepository:
 
         result = await self.db_session.execute(query)
 
-        client = result.unique().scalar_one_or_none()
+        employee = result.unique().scalar_one_or_none()
 
-        return client, products, sales
+        return employee, products, sales
 
     async def map_request_to_model(
         self, request: SaleRequest, sale_code: str

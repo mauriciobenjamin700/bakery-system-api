@@ -15,6 +15,7 @@ from .product import (
     ProductResponse,
     ProductUpdate,
 )
+from .report import ProductReportResponse
 from .sale import SaleNoteRequest, SaleNoteResponse, SaleRequest, SaleResponse
 from .user import LoginRequest, TokenResponse, UserRequest, UserResponse
 
@@ -32,6 +33,7 @@ __all__ = [
     "PortionResponse",
     "ProductUpdate",
     "ProductBatchUpdate",
+    "ProductReportResponse",
     "SaleRequest",
     "SaleResponse",
     "SaleNoteRequest",

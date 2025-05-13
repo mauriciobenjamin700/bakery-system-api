@@ -1,7 +1,11 @@
 import asyncio
 import uvicorn
+
+from app.core.errors import NotFoundError
 from app.db.configs.connection import db
 from app.main import app
+from app.schemas import UserRequest, LoginRequest
+from app.services import UserService
 
 async def create_tables():
     max_retries = 5
@@ -15,6 +19,33 @@ async def create_tables():
             if attempt == max_retries - 1:
                 raise
             await asyncio.sleep(2 * (attempt + 1))
+            
+    db_session = await db.get_session()
+    
+    service = UserService(db_session)
+    
+    try:
+        await service.login(
+            LoginRequest(
+                email="admin@email.com",
+                password="adminPassword@123",\
+            )
+    )
+    except NotFoundError:
+        
+        try:
+    
+            service.add(
+                UserRequest(
+                    name="admin",
+                    phone="89912345678",
+                    email="admin@email.com",
+                    password="adminPassword@123",
+                )
+            )
+            
+        except Exception as e:
+            print(f"Erro ao criar o usuário admin: {str(e)}")
 
 async def main():
     # Inicializa o banco de dados

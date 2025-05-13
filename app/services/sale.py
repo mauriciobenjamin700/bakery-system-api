@@ -27,8 +27,8 @@ class SaleService:
         add(request: SaleRequest | SaleNoteRequest) -> SaleResponse | SaleNoteResponse:
             Adds a SaleModel to the database.
 
-        get_sales_by_client_id(client_id: str) -> list[SaleResponse]:
-            Retrieves sales by client ID.
+        get_sales_by_employee_id(employee_id: str) -> list[SaleResponse]:
+            Retrieves sales by employee ID.
 
         get_sales_by_product_id(product_id: str) -> list[SaleResponse]:
             Retrieves sales by product ID.
@@ -51,7 +51,7 @@ class SaleService:
         cancel_sale_note(sale_code: str) -> Message:
             Cancels a sale note by sale code.
 
-        build_sale_note_response(client: UserModel, products: list[ProductModel], sales: list[SaleModel]) -> SaleNoteResponse:
+        build_sale_note_response(employee: UserModel, products: list[ProductModel], sales: list[SaleModel]) -> SaleNoteResponse:
             Builds a SaleNoteResponse object from the given data.
     """
 
@@ -98,32 +98,34 @@ class SaleService:
 
                 model = await self.repository.add(model)
 
-            client, products, sales = await self.repository.get_sale_note_data(
-                sale_code=sale_code
+            employee, products, sales = (
+                await self.repository.get_sale_note_data(sale_code=sale_code)
             )
 
             response = await self.build_sale_note_response(
-                client=client,
+                employee=employee,
                 products=products,
                 sales=sales,
             )
 
         return response
 
-    async def get_sales_by_client_id(
-        self, client_id: str
+    async def get_sales_by_employee_id(
+        self, employee_id: str
     ) -> list[SaleResponse]:
         """
-        Get sales by client ID.
+        Get sales by employee ID.
 
         Args:
-            client_id (str): The ID of the client.
+            employee_id (str): The ID of the employee.
 
         Returns:
             list[SaleResponse]: List of SaleResponse objects.
         """
 
-        sales = await self.repository.get(user_id=client_id, all_results=True)
+        sales = await self.repository.get(
+            user_id=employee_id, all_results=True
+        )
         if not sales:
             raise NotFoundError(
                 "sales not found",
@@ -203,17 +205,17 @@ class SaleService:
             SaleNoteResponse: The SaleNoteResponse object.
         """
 
-        client, products, sales = await self.repository.get_sale_note_data(
+        employee, products, sales = await self.repository.get_sale_note_data(
             sale_code=sale_code
         )
 
-        if not client or not products or not sales:
+        if not employee or not products or not sales:
             raise NotFoundError(
                 "sale note not found",
             )
 
         return await self.build_sale_note_response(
-            client=client,
+            employee=employee,
             products=products,
             sales=sales,
         )
@@ -260,12 +262,12 @@ class SaleService:
             sale.is_paid = True
             await self.repository.update(model=sale)
 
-        client, products, sales = await self.repository.get_sale_note_data(
+        employee, products, sales = await self.repository.get_sale_note_data(
             sale_code=sale_code
         )
 
         return await self.build_sale_note_response(
-            client=client,
+            employee=employee,
             products=products,
             sales=sales,
         )
@@ -300,7 +302,7 @@ class SaleService:
 
     async def build_sale_note_response(
         self,
-        client: UserModel,
+        employee: UserModel,
         products: list[ProductModel],
         sales: list[SaleModel],
     ) -> SaleNoteResponse:
@@ -308,7 +310,7 @@ class SaleService:
         Build a SaleNoteResponse object from the given data.
 
         Args:
-            client (UserModel): The client user model.
+            employee (UserModel): The employee user model.
             products (list[ProductModel]): List of product models.
             sales (list[SaleModel]): List of sale models.
 
@@ -316,7 +318,7 @@ class SaleService:
             SaleNoteResponse: The constructed SaleNoteResponse object.
         """
 
-        client = UserRepository.map_model_to_response(client)
+        employee = UserRepository.map_model_to_response(employee)
         products = [
             await ProductRepository.map_model_to_response(product)
             for product in products
@@ -327,7 +329,7 @@ class SaleService:
         total_value = sum([sale.value for sale in sales])
 
         return SaleNoteResponse(
-            client=client,
+            employee=employee,
             products=products,
             notes=notes,
             total_value=total_value,
