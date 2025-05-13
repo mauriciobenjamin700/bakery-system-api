@@ -320,6 +320,7 @@ class SaleModel(Base):
         is_paid (bool): A flag indicating whether the sale is paid.
         quantity (float): The quantity of the product sold.
         value (float): The value of the sale.
+        sale_code (str): A unique code for the sale.
         created_at (datetime): The date and time when the sale was created.
     """
 
@@ -339,6 +340,7 @@ class SaleModel(Base):
     )
     quantity: Mapped[float] = mapped_column(Float, nullable=False)
     value: Mapped[float] = mapped_column(Float, nullable=False)
+    sale_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP,
         nullable=False,

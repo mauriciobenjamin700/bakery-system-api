@@ -1,0 +1,300 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.errors import NotFoundError, ValidationError
+from app.core.generate.ids import code_generator
+from app.db.models import ProductModel, SaleModel, UserModel
+from app.db.repositories import (
+    ProductRepository,
+    SaleRepository,
+    UserRepository,
+)
+from app.schemas import (
+    Message,
+    SaleNoteRequest,
+    SaleNoteResponse,
+    SaleRequest,
+    SaleResponse,
+)
+
+
+class SaleService:
+    """
+    Service class for handling Sale operations.
+
+    Attributes:
+        repository (SaleRepository): The repository instance for database operations.
+    Methods:
+        add(request: SaleRequest | SaleNoteRequest) -> SaleResponse | SaleNoteResponse:
+            Adds a SaleModel to the database.
+
+        get_sales_by_client_id(client_id: str) -> list[SaleResponse]:
+            Retrieves sales by client ID.
+
+        get_sales_by_product_id(product_id: str) -> list[SaleResponse]:
+            Retrieves sales by product ID.
+
+        get_all() -> list[SaleResponse]:
+            Retrieves all sales.
+
+        delete(sale_id: str) -> Message:
+            Deletes a sale by ID.
+
+        confirm_sale(sale_code: str) -> SaleNoteResponse:
+            Confirms a sale note by sale code.
+
+        cancel_sale_note(sale_code: str) -> Message:
+            Cancels a sale note by sale code.
+
+        build_sale_note_response(client: UserModel, products: list[ProductModel], sales: list[SaleModel]) -> SaleNoteResponse:
+            Builds a SaleNoteResponse object from the given data.
+    """
+
+    def __init__(self, db_session: AsyncSession):
+        self.repository = SaleRepository(db_session)
+
+    async def add(
+        self, request: SaleRequest | SaleNoteRequest
+    ) -> SaleResponse | SaleNoteResponse:
+        """
+        Async method to add a SaleModel to the database.
+
+        Args:
+            model (SaleRequest): The model object to add.
+
+        Returns:
+            SaleResponse: The added model object.
+        """
+
+        if not isinstance(request, (SaleRequest, SaleNoteRequest)):
+            raise ValidationError(
+                "request",
+                "request must be of type SaleRequest or SaleNoteRequest",
+            )
+
+        sale_code = code_generator()
+
+        if type(request) is SaleRequest:
+            model = await self.repository.map_request_to_model(
+                request, sale_code
+            )
+
+            model = await self.repository.add(model)
+
+            response = await self.repository.map_model_to_response(model)
+
+        elif type(request) is SaleNoteRequest:
+
+            for sale in request.sales:
+
+                model = await self.repository.map_request_to_model(
+                    sale, sale_code
+                )
+
+                model = await self.repository.add(model)
+
+            client, products, sales = await self.repository.get_sale_note_data(
+                sale_code=sale_code
+            )
+
+            response = await self.build_sale_note_response(
+                client=client,
+                products=products,
+                sales=sales,
+            )
+
+        return response
+
+    async def get_sales_by_client_id(
+        self, client_id: str
+    ) -> list[SaleResponse]:
+        """
+        Get sales by client ID.
+
+        Args:
+            client_id (str): The ID of the client.
+
+        Returns:
+            list[SaleResponse]: List of SaleResponse objects.
+        """
+
+        sales = await self.repository.get(user_id=client_id, all_results=True)
+        if not sales:
+            raise NotFoundError(
+                "sales not found",
+            )
+
+        return [self.repository.map_model_to_response(sale) for sale in sales]
+
+    async def get_sales_by_product_id(
+        self, product_id: str
+    ) -> list[SaleResponse]:
+        """
+        Get sales by product ID.
+
+        Args:
+            product_id (str): The ID of the product.
+
+        Returns:
+            list[SaleResponse]: List of SaleResponse objects.
+        """
+
+        sales = await self.repository.get(
+            product_id=product_id, all_results=True
+        )
+        if not sales:
+            raise NotFoundError(
+                "sales not found",
+            )
+
+        return [self.repository.map_model_to_response(sale) for sale in sales]
+
+    async def get_sales_by_sale_code(
+        self, sale_code: str
+    ) -> list[SaleResponse]:
+        """
+        Get sales by sale code.
+        Args:
+            sale_code (str): The sale code of the sales to retrieve.
+        Returns:
+            list[SaleResponse]: List of SaleResponse objects.
+        """
+        sales = await self.repository.get(
+            sale_code=sale_code, all_results=True
+        )
+        if not sales:
+            raise NotFoundError(
+                "sales not found",
+            )
+
+        return [self.repository.map_model_to_response(sale) for sale in sales]
+
+    async def get_all(self) -> list[SaleResponse]:
+        """
+        Get all sales.
+
+        Returns:
+            list[SaleResponse]: List of SaleResponse objects.
+        """
+
+        sales = await self.repository.get(all_results=True)
+        if not sales:
+            raise NotFoundError(
+                "sales not found",
+            )
+
+        return [self.repository.map_model_to_response(sale) for sale in sales]
+
+    async def delete(self, sale_id: str) -> Message:
+        """
+        Delete a sale by ID.
+
+        Args:
+            sale_id (str): The ID of the sale to delete.
+
+        Returns:
+            SaleResponse: The deleted SaleResponse object.
+        """
+
+        sale = await self.repository.delete(sale_id)
+        if not sale:
+            raise NotFoundError(
+                "sale not found",
+            )
+
+        return Message(
+            message="sale deleted",
+        )
+
+    async def confirm_sale(self, sale_code: str) -> SaleNoteResponse:
+        """
+        Confirm a sale note by sale code.
+        Args:
+            sale_code (str): The sale code of the sale note to confirm.
+        Returns:
+            SaleNoteResponse: The confirmed SaleNoteResponse object.
+        """
+        sales = await self.repository.get(
+            sale_code=sale_code, all_results=True
+        )
+
+        if not sales:
+            raise NotFoundError(
+                "sale note not found",
+            )
+
+        for sale in sales:
+            sale.is_paid = True
+            await self.repository.update(model=sale)
+
+        client, products, sales = await self.repository.get_sale_note_data(
+            sale_code=sale_code
+        )
+
+        return await self.build_sale_note_response(
+            client=client,
+            products=products,
+            sales=sales,
+        )
+
+    async def cancel_sale_note(self, sale_code: str) -> Message:
+        """
+        Cancel a sale note by sale code.
+
+        Args:
+            sale_code (str): The sale code of the sale note to cancel.
+
+        Returns:
+            SaleNoteResponse: The canceled SaleNoteResponse object.
+        """
+
+        sales = await self.repository.get(
+            sale_code=sale_code, all_results=True
+        )
+
+        if not sales:
+            raise NotFoundError(
+                "sale note not found",
+            )
+
+        for sale in sales:
+
+            await self.repository.delete(model=sale)
+
+        return Message(
+            message="sale note canceled",
+        )
+
+    async def build_sale_note_response(
+        self,
+        client: UserModel,
+        products: list[ProductModel],
+        sales: list[SaleModel],
+    ) -> SaleNoteResponse:
+        """
+        Build a SaleNoteResponse object from the given data.
+
+        Args:
+            client (UserModel): The client user model.
+            products (list[ProductModel]): List of product models.
+            sales (list[SaleModel]): List of sale models.
+
+        Returns:
+            SaleNoteResponse: The constructed SaleNoteResponse object.
+        """
+
+        client = UserRepository.map_model_to_response(client)
+        products = [
+            await ProductRepository.map_model_to_response(product)
+            for product in products
+        ]
+        notes = [
+            await self.repository.map_model_to_response(sale) for sale in sales
+        ]
+        total_value = sum([sale.value for sale in sales])
+
+        return SaleNoteResponse(
+            client=client,
+            products=products,
+            notes=notes,
+            total_value=total_value,
+        )

@@ -1,14 +1,36 @@
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import NotFoundError
+from app.core.errors import NotFoundError, ValidationError
 from app.db.models import ProductBatchModel, ProductModel, SaleModel, UserModel
-from app.schemas import SaleNoteResponse, SaleRequest, SaleResponse
+from app.schemas import SaleRequest, SaleResponse
 
 
 class SaleRepository:
     """
     Repository class for handling Sale operations.
+
+    Methods:
+        add(model: SaleModel) -> SaleModel:
+            Adds a SaleModel to the database.
+
+        get(id: str | None = None, user_id: str | None = None, product_id: str | None = None, all_results: bool = False) -> SaleModel | list[SaleModel] | None:
+            Retrieves SaleModel(s) from the database.
+
+        update(model: SaleModel) -> SaleModel:
+            Updates a SaleModel in the database.
+
+        delete(id: str | None = None, model: SaleModel | None = None) -> bool:
+            Deletes a SaleModel from the database.
+
+        get_sale_note_data(sale_code: str) -> tuple[UserModel, list[ProductModel], list[SaleModel]] | None:
+            Retrieves sale note data for a given sale code.
+
+        map_request_to_model(request: SaleRequest, sale_code: str) -> SaleModel:
+            Maps a SaleRequest to a SaleModel.
+
+        map_model_to_response(model: SaleModel) -> SaleResponse:
+            Maps a SaleModel to a SaleResponse.
     """
 
     def __init__(self, db_session: AsyncSession):
@@ -84,6 +106,7 @@ class SaleRepository:
         id: str | None = None,
         user_id: str | None = None,
         product_id: str | None = None,
+        sale_code: str | None = None,
         all_results: bool = False,
     ) -> SaleModel | list[SaleModel] | None:
         """
@@ -106,13 +129,17 @@ class SaleRepository:
                 SaleModel.created_at.desc()
             )
 
-        if user_id:
+        elif user_id:
             query = query.where(SaleModel.user_id == user_id).order_by(
                 SaleModel.created_at.desc()
             )
 
-        if product_id:
+        elif product_id:
             query = query.where(SaleModel.product_id == product_id).order_by(
+                SaleModel.created_at.desc()
+            )
+        elif sale_code:
+            query = query.where(SaleModel.sale_code == sale_code).order_by(
                 SaleModel.created_at.desc()
             )
 
@@ -156,7 +183,7 @@ class SaleRepository:
         """
 
         if not id and not model:
-            raise NotFoundError("ID or model must be provided")
+            raise ValidationError("ID or model must be provided")
 
         if model:
             query = delete(SaleModel).where(SaleModel.id == model.id)
@@ -169,14 +196,44 @@ class SaleRepository:
 
         return result.rowcount > 0
 
-    async def get_sale_note(self) -> SaleNoteResponse:
+    async def get_sale_note_data(
+        self, sale_code: str
+    ) -> tuple[UserModel, list[ProductModel], list[SaleModel]] | None:
         """
-        Get a sale note.
+        Get a sale note for a given sale code.
+        Args:
+            sale_code (str): The sale code to retrieve the note for.
+        Returns:
+            tuple: A tuple containing the products, user, and total value of the sale.
         """
-        pass
-        # TODO: Implement this method to retrieve a sale note.
 
-    async def map_request_to_model(self, request: SaleRequest) -> SaleModel:
+        sales: list[SaleModel] = await self.get(
+            sale_code=sale_code, all_results=True
+        )
+
+        if not sales:
+            return None
+
+        product_ids = [model.product_id for model in sales]
+        user_id = sales[0].user_id
+
+        query = select(ProductModel).where(ProductModel.id.in_(product_ids))
+
+        result = await self.db_session.execute(query)
+
+        products = result.unique().scalars().all()
+
+        query = select(UserModel).where(UserModel.id == user_id)
+
+        result = await self.db_session.execute(query)
+
+        client = result.unique().scalar_one_or_none()
+
+        return client, products, sales
+
+    async def map_request_to_model(
+        self, request: SaleRequest, sale_code: str
+    ) -> SaleModel:
         """
         Async method to map a SaleRequest to a SaleModel.
 
@@ -200,7 +257,9 @@ class SaleRepository:
 
         value = product.price_sale * request.quantity
 
-        return SaleModel(**request.to_dict(include={"value": value}))
+        return SaleModel(
+            **request.to_dict(include={"value": value, "sale_code": sale_code})
+        )
 
     def map_model_to_response(self, model: SaleModel) -> SaleResponse:
         """

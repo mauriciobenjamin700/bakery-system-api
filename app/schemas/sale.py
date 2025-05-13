@@ -66,10 +66,10 @@ class SaleNoteResponse(BaseSchema):
         client (UserResponse): The user who made the sale.
         products (list[ProductResponse]): A list of products sold.
         notes (list[SaleResponse]): A list of sales.
-        value (float): The total value of the sale.
+        total_value (float): The total value of the sale.
     """
 
     client: UserResponse
     products: list[ProductResponse]
     notes: list[SaleResponse]
-    value: float
+    total_value: float
