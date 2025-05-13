@@ -22,13 +22,14 @@ async def add_ingredient(
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
-    A route to add an ingredient.
+    # A route to add an ingredient.
 
-    Args:
-        request (IngredientRequest): The request object containing ingredient data.
-        session (AsyncSession): The database session.
-    Returns:
-        IngredientResponse: The response object containing the added ingredient data.
+    ## Args:
+        - request (IngredientRequest): The request object containing ingredient data.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - IngredientResponse: The response object containing the added ingredient data.
     """
     service = IngredientService(session)
     ingredient = await service.add(request)
@@ -42,12 +43,14 @@ async def get_ingredients(
     session: AsyncSession = Depends(get_session),
 ) -> list[IngredientResponse]:
     """
-    A route to get all ingredients.
+    # A route to get all ingredients.
 
-    Args:
-        session (AsyncSession): The database session.
-    Returns:
-        list[IngredientResponse]: A list of ingredient response objects.
+    ## Args:
+        - ingredient_id (str | None): The ID of the ingredient to retrieve.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - list[IngredientResponse]: A list of ingredient response objects.
     """
     service = IngredientService(session)
     if ingredient_id:
@@ -65,14 +68,15 @@ async def update_ingredient(
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
-    A route to update an ingredient.
+    #  A route to update an ingredient.
 
-    Args:
-        ingredient_id (str): The ID of the ingredient to be updated.
-        request (IngredientRequest): The request object containing updated ingredient data.
-        session (AsyncSession): The database session.
-    Returns:
-        IngredientResponse: The response object containing the updated ingredient data.
+    ## Args:
+        - ingredient_id (str): The ID of the ingredient to be updated.
+        - request (IngredientRequest): The request object containing updated ingredient data.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - IngredientResponse: The response object containing the updated ingredient data.
     """
     service = IngredientService(session)
     ingredient = await service.update(ingredient_id, request)
@@ -86,13 +90,14 @@ async def delete_ingredient(
     session: AsyncSession = Depends(get_session),
 ) -> Message:
     """
-    A route to delete an ingredient.
+    # A route to delete an ingredient.
 
-    Args:
-        ingredient_id (str): The ID of the ingredient to be deleted.
-        session (AsyncSession): The database session.
-    Returns:
-        None
+    ## Args:
+        - ingredient_id (str): The ID of the ingredient to be deleted.
+        - _ (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - Message: A message indicating the result of the deletion.
     """
     service = IngredientService(session)
     response = await service.delete(ingredient_id)
@@ -106,13 +111,14 @@ async def add_ingredient_batch(
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
-    A route to add a batch of ingredients.
+    # A route to add a batch of ingredients.
 
-    Args:
-        request (IngredientRequest): The request object containing ingredient data.
-        session (AsyncSession): The database session.
-    Returns:
-        IngredientResponse: The response object containing the added ingredient data.
+    ## Args:
+        - request (IngredientBatchRequest): The request object containing ingredient data.
+        - _: UserResponse: The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - IngredientResponse: The response object containing the added ingredient data.
     """
     service = IngredientService(session)
     ingredient = await service.add_batch(request)
@@ -127,14 +133,14 @@ async def update_ingredient_batch(
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
     """
-    A route to update a batch of ingredients.
-
-    Args:
-        batch_id (str): The ID of the batch to be updated.
-        request (IngredientRequest): The request object containing updated ingredient data.
-        session (AsyncSession): The database session.
-    Returns:
-        IngredientResponse: The response object containing the updated ingredient data.
+    # A route to update a batch of ingredients.
+    ## Args:
+        - batch_id (str): The ID of the batch to be updated.
+        - request (IngredientBatchRequest): The request object containing updated ingredient data.
+        - _: UserResponse: The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - IngredientResponse: The response object containing the updated ingredient data.
     """
     service = IngredientService(session)
     ingredient = await service.update_batch(batch_id, request)
@@ -148,13 +154,13 @@ async def delete_ingredient_batch(
     session: AsyncSession = Depends(get_session),
 ) -> Message:
     """
-    A route to delete a batch of ingredients.
-
-    Args:
-        batch_id (str): The ID of the batch to be deleted.
-        session (AsyncSession): The database session.
-    Returns:
-        None
+    # A route to delete a batch of ingredients.
+    ## Args:
+        - batch_id (str): The ID of the batch to be deleted.
+        - _: UserResponse: The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - Message: A message indicating the result of the deletion.
     """
     service = IngredientService(session)
     response = await service.delete_batch(batch_id)

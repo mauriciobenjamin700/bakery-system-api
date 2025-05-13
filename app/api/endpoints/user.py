@@ -25,13 +25,13 @@ async def add_user(
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
-    A route to add a user.
+    # A route to add a user.
 
-    Args:
-        request (UserRequest): The request object containing user data.
-        session (AsyncSession): The database session.
-    Returns:
-        UserResponse: The response object containing the added user data.
+    ## Args:
+        - request (UserRequest): The request object containing user data.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - UserResponse: The response object containing the added user data.
     """
     service = UserService(session)
     user = await service.add(request)
@@ -44,12 +44,13 @@ async def get_users(
     session: AsyncSession = Depends(get_session),
 ) -> list[UserResponse]:
     """
-    A route to get all users.
+    # A route to get all users.
 
-    Args:
-        session (AsyncSession): The database session.
-    Returns:
-        list[UserResponse]: A list of user response objects.
+    ## Args:
+        - _: UserResponse: The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - list[UserResponse]: A list of user response objects.
     """
     service = UserService(session)
     users = await service.get_all()
@@ -63,12 +64,14 @@ async def get_user(
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
-    A route to get a user by id.
-    Args:
-        user_id (str): The id of the user to be retrieved.
-        session (AsyncSession): The database session.
-    Returns:
-        UserResponse: The response object containing the user data.
+    # A route to get a user by id.
+
+    ## Args:
+        - user_id (str): The id of the user to be retrieved.
+        - user (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - UserResponse: The response object containing the user data.
     """
 
     user_permission(user_id=user_id, user=user)
@@ -86,13 +89,15 @@ async def update_user(
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
-    A route to update a user by id.
-    Args:
-        user_id (str): The id of the user to be updated.
-        request (UserRequest): The request object containing the updated user data.
-        session (AsyncSession): The database session.
-    Returns:
-        UserResponse: The response object containing the updated user data.
+    # A route to update a user by id.
+
+    ## Args:
+        - user_id (str): The id of the user to be updated.
+        - request (UserRequest): The request object containing updated user data.
+        - user (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - UserResponse: The response object containing the updated user data.
     """
 
     user_permission(user_id=user_id, user=user)
@@ -109,12 +114,13 @@ async def delete_user(
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
-    A route to delete a user by id.
-    Args:
-        user_id (str): The id of the user to be deleted.
-        session (AsyncSession): The database session.
-    Returns:
-        UserResponse: The response object containing the deleted user data.
+    # A route to delete a user by id.
+    ## Args:
+        - user_id (str): The id of the user to be deleted.
+        - user (UserResponse): The user making the request.
+        - session (AsyncSession): The database session.
+    ## Returns:
+        - UserResponse: The response object containing the deleted user data.
     """
 
     user_permission(user_id=user_id, user=user)

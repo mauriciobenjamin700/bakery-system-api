@@ -33,6 +33,12 @@ class SaleService:
         get_sales_by_product_id(product_id: str) -> list[SaleResponse]:
             Retrieves sales by product ID.
 
+        get_sales_by_sale_code(sale_code: str) -> list[SaleResponse]:
+            Retrieves sales by sale code.
+
+        get_sale_note_by_sale_code(sale_code: str) -> SaleNoteResponse:
+            Retrieves a sale note by sale code.
+
         get_all() -> list[SaleResponse]:
             Retrieves all sales.
 
@@ -183,6 +189,34 @@ class SaleService:
             )
 
         return [self.repository.map_model_to_response(sale) for sale in sales]
+
+    async def get_sale_note_by_sale_code(
+        self, sale_code: str
+    ) -> SaleNoteResponse:
+        """
+        Get a sale note by sale code.
+
+        Args:
+            sale_code (str): The sale code of the sale note to retrieve.
+
+        Returns:
+            SaleNoteResponse: The SaleNoteResponse object.
+        """
+
+        client, products, sales = await self.repository.get_sale_note_data(
+            sale_code=sale_code
+        )
+
+        if not client or not products or not sales:
+            raise NotFoundError(
+                "sale note not found",
+            )
+
+        return await self.build_sale_note_response(
+            client=client,
+            products=products,
+            sales=sales,
+        )
 
     async def delete(self, sale_id: str) -> Message:
         """

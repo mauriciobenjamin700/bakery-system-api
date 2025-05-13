@@ -1,7 +1,8 @@
 from pydantic import Field
 
-from app.schemas import ProductResponse, UserResponse
+from app.schemas.product import ProductResponse
 from app.schemas.settings.base import BaseSchema
+from app.schemas.user import UserResponse
 
 
 class SaleBase(BaseSchema):

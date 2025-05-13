@@ -5,18 +5,18 @@ from fastapi.responses import JSONResponse
 
 from app.api.endpoints.ingredient import router as ingredient_router
 from app.api.endpoints.product import router as product_router
+from app.api.endpoints.sale import router as sale_router
 from app.api.endpoints.user import router as user_router
 from app.api.middlewares.error import CustomErrorMiddleware
 
 app = FastAPI(
-    title="Template de API com FastAPI",
-    summary="Um modelo de API com FastAPI",
-    description="Um modelo de API com FastAPI para ajudar pessoas a começar a desenvolver suas APIs de forma organizada",
-    version="0.0.1",
+    title="Bakery System API",
+    summary="A system to manage bakery sales",
+    description="This API is designed to manage bakery sales, including products, ingredients, and users.",
+    version="1.0.0",
     root_path="/api",
 )
 
-# Configurando o middleware de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,7 +27,6 @@ app.add_middleware(
 app.add_middleware(CustomErrorMiddleware)
 
 
-# Sobrescrevendo o manipulador de exceções para erros de validação do Pydantic
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
@@ -49,9 +48,9 @@ async def validation_exception_handler(
     return JSONResponse(status_code=422, content={"detail": detail})
 
 
-# Incluindo os roteadores
 app.include_router(ingredient_router)
 app.include_router(product_router)
+app.include_router(sale_router)
 app.include_router(user_router)
 
 
@@ -62,4 +61,4 @@ def test_api():
     Returns:
         dict: A dictionary with a message indicating the API is running.
     """
-    return {"detail": "API rodando!"}
+    return {"detail": "API online!"}
