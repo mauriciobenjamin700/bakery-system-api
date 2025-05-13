@@ -1,19 +1,19 @@
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from app.core.errors import NotFoundError
 from app.db.models import ProductBatchModel, ProductModel, SaleModel, UserModel
-from app.schemas import SaleRequest, SaleResponse, SaleNoteResponse
+from app.schemas import SaleNoteResponse, SaleRequest, SaleResponse
 
 
 class SaleRepository:
     """
     Repository class for handling Sale operations.
     """
+
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
-        
+
     async def add(self, model: SaleModel) -> SaleModel:
         """
         Async method to add a SaleModel to the database.
@@ -24,55 +24,46 @@ class SaleRepository:
         Returns:
             SaleModel: The added model object.
         """
-        
-        query = select(ProductModel).where(
-            ProductModel.id == model.product_id
-        )
-        
+
+        query = select(ProductModel).where(ProductModel.id == model.product_id)
+
         result = await self.db_session.execute(query)
-        
+
         product = result.unique().scalars().first()
-        
+
         if not product:
             raise NotFoundError("Product not found")
-        
-        query = select(ProductBatchModel).where(
-            ProductBatchModel.product_id == model.product_id
-        ).order_by(
-            ProductBatchModel.validity.asc()
+
+        query = (
+            select(ProductBatchModel)
+            .where(ProductBatchModel.product_id == model.product_id)
+            .order_by(ProductBatchModel.validity.asc())
         )
-        
+
         result = await self.db_session.execute(query)
-        
+
         batches = result.unique().scalars().all()
-        
+
         if not batches:
             raise NotFoundError("Product batch not found")
-        
-        quantity = sum(
-            [
-                batch.quantity
-                for batch in batches
-            ]
-        )
-        
+
+        quantity = sum([batch.quantity for batch in batches])
+
         if quantity < model.quantity:
             raise NotFoundError("Not enough product in stock")
-        
-        query = select(UserModel).where(
-            UserModel.id == model.user_id
-        )
-        
+
+        query = select(UserModel).where(UserModel.id == model.user_id)
+
         result = await self.db_session.execute(query)
-        
+
         user = result.unique().scalar_one_or_none()
-        
+
         if not user:
-            
+
             raise NotFoundError("User not found")
-        
+
         products_sold = model.quantity
-        
+
         for batch in batches:
             if batch.quantity >= products_sold:
                 batch.quantity -= products_sold
@@ -81,14 +72,13 @@ class SaleRepository:
                 products_sold -= batch.quantity
                 await self.db_session.delete(batch)
 
-        
         self.db_session.add(model)
-        
+
         await self.db_session.commit()
         await self.db_session.refresh(model)
-        
+
         return model
-    
+
     async def get(
         self,
         id: str | None = None,
@@ -108,31 +98,31 @@ class SaleRepository:
         Returns:
             SaleModel | list[SaleModel] | None: The retrieved model(s) or None.
         """
-        
+
         query = select(SaleModel)
-        
+
         if id:
             query = query.where(SaleModel.id == id).order_by(
                 SaleModel.created_at.desc()
             )
-            
+
         if user_id:
             query = query.where(SaleModel.user_id == user_id).order_by(
                 SaleModel.created_at.desc()
             )
-            
+
         if product_id:
             query = query.where(SaleModel.product_id == product_id).order_by(
                 SaleModel.created_at.desc()
             )
-            
+
         result = await self.db_session.execute(query)
-        
+
         if all_results:
             return result.scalars().all()
-        
+
         return result.unique().scalar_one_or_none()
-    
+
     async def update(self, model: SaleModel) -> SaleModel:
         """
         Async method to update a SaleModel in the database.
@@ -143,12 +133,12 @@ class SaleRepository:
         Returns:
             SaleModel: The updated model object.
         """
-        
+
         await self.db_session.commit()
         await self.db_session.refresh(model)
-        
+
         return model
-    
+
     async def delete(
         self,
         id: str | None = None,
@@ -164,29 +154,29 @@ class SaleRepository:
         Returns:
             bool: True if deletion was successful, False otherwise.
         """
-        
+
         if not id and not model:
             raise NotFoundError("ID or model must be provided")
-        
+
         if model:
             query = delete(SaleModel).where(SaleModel.id == model.id)
         else:
             query = delete(SaleModel).where(SaleModel.id == id)
-        
+
         result = await self.db_session.execute(query)
-        
+
         await self.db_session.commit()
-        
+
         return result.rowcount > 0
-    
-    
+
     async def get_sale_note(self) -> SaleNoteResponse:
+        """
+        Get a sale note.
+        """
         pass
         # TODO: Implement this method to retrieve a sale note.
 
-    async def map_request_to_model(
-        self, request: SaleRequest
-    ) -> SaleModel:
+    async def map_request_to_model(self, request: SaleRequest) -> SaleModel:
         """
         Async method to map a SaleRequest to a SaleModel.
 
@@ -196,32 +186,23 @@ class SaleRepository:
         Returns:
             SaleModel: The mapped model object.
         """
-        
+
         query = select(ProductModel).where(
             ProductModel.id == request.product_id
         )
-        
+
         result = await self.db_session.execute(query)
-        
+
         product = result.unique().scalars().first()
-        
+
         if not product:
             raise NotFoundError("Product not found")
-        
+
         value = product.price_sale * request.quantity
-        
-        return SaleModel(
-            **request.to_dict(
-                include={
-                    "value": value
-                }
-            )
-        )
-        
-        
-    def map_model_to_response(
-        self, model: SaleModel
-    ) -> SaleResponse:
+
+        return SaleModel(**request.to_dict(include={"value": value}))
+
+    def map_model_to_response(self, model: SaleModel) -> SaleResponse:
         """
         method to map a SaleModel to a SaleResponse.
 
@@ -231,8 +212,7 @@ class SaleRepository:
         Returns:
             SaleResponse: The mapped response object.
         """
-        
+
         return SaleResponse(
             model.to_dict(),
         )
-        
