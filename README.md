@@ -81,3 +81,12 @@ Ex:
 git rm -r --cached api/app/images/*.png
 git rm -r --cached api/app/images/*.jpg
 ```
+
+## Admin Data
+
+```bash
+name="admin",
+phone="89912345678",
+email="admin@email.com",
+password="adminPassword@123",
+```

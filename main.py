@@ -1,8 +1,11 @@
 import asyncio
 import uvicorn
 
+from app.core.constants.enums.user import UserRoles
 from app.core.errors import NotFoundError
+from app.core.security.password import hash_password
 from app.db.configs.connection import db
+from app.db.models import UserModel
 from app.main import app
 from app.schemas import UserRequest, LoginRequest
 from app.services import UserService
@@ -35,12 +38,13 @@ async def create_tables():
         
         try:
     
-            service.add(
-                UserRequest(
+            await service.repository.add(
+                UserModel(
                     name="admin",
                     phone="89912345678",
                     email="admin@email.com",
-                    password="adminPassword@123",
+                    password=hash_password("adminPassword@123"),
+                    role=UserRoles.ADMIN.value
                 )
             )
             
@@ -56,8 +60,7 @@ async def main():
         app,
         host="0.0.0.0",
         port=8000,
-        log_level="info",
-        log_config="logging_config.yaml"  # Apontar para o arquivo de configuração de log
+        log_level="info"
     )
 
     server = uvicorn.Server(config)

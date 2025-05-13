@@ -22,6 +22,5 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
         session = await test_db.get_session()
     else:
-        async with db as session:
-            session = await db.get_session()
-            yield session
+        session = await db.get_session()
+        yield session
