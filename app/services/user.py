@@ -240,7 +240,7 @@ class UserService:
             access_token=TokenManager.create_access_token(
                 data={
                     "user_id": response.id,
-                    "role": response.role.value,
+                    "user_role": response.role.value,
                 }
             ),
             token_type="bearer",

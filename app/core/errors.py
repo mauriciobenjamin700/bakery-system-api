@@ -61,6 +61,27 @@ class NotFoundError(Exception):
         super().__init__(detail)
 
 
+class ServerError(Exception):
+    """
+    A class that represents a server error.
+
+    - Attributes:
+        - status_code: The status code of the error.
+        - detail: The error message.
+    """
+
+    def __init__(self, detail: str):
+        """
+        The constructor for the ServerError class.
+
+        - Args:
+            - detail: The error message.
+        """
+        self.status_code = 500
+        self.detail = detail
+        super().__init__(detail)
+
+
 class UnauthorizedError(Exception):
     """
     A class that represents an unauthorized error.
