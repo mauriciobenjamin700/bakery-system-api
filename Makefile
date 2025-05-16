@@ -2,13 +2,13 @@ DOCKER_COMPOSE_FILE=../docker-compose.yaml
 
 lint:
 	ruff check app/
-	isort --check-only app/
-	black --check app/
+	isort --check-only app/ tests/
+	black --check app/ tests/
 
 lint-fix:
 	ruff check --fix app/
-	isort app/
-	black app/     
+	isort app/ tests/
+	black app/ tests/
 
 pre-commit:
 	pre-commit autoupdate

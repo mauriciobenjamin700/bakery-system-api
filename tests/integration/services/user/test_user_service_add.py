@@ -33,7 +33,9 @@ async def test_user_service_add_success(mock_db_session, mock_user_request):
 
 
 @pytest.mark.asyncio
-async def test_user_service_add_fail_already_exists(mock_db_session, mock_user_request):
+async def test_user_service_add_fail_already_exists(
+    mock_db_session, mock_user_request
+):
 
     # Arrange
 

@@ -1,11 +1,15 @@
-import pytest
 from time import sleep
+
+import pytest
 
 from app.db.models import UserModel
 from app.db.repositories.user import UserRepository
 
+
 @pytest.mark.asyncio
-async def test_user_repository_update_success(mock_db_session, mock_user_model):
+async def test_user_repository_update_success(
+    mock_db_session, mock_user_model
+):
 
     # Arrange
 
@@ -27,7 +31,7 @@ async def test_user_repository_update_success(mock_db_session, mock_user_model):
         "role": model.role,
         "id": model.id,
         "created_at": model.created_at,
-        "updated_at": model.updated_at
+        "updated_at": model.updated_at,
     }
 
     on_db.name = update.get("name")
@@ -39,7 +43,6 @@ async def test_user_repository_update_success(mock_db_session, mock_user_model):
     sleep(1)
 
     response = await repo.update(on_db)
-
 
     # Assert
 

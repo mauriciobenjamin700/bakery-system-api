@@ -1,13 +1,11 @@
 from fastapi.testclient import TestClient
 from pytest import fixture
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.constants.enums.ingredient import IngredientMeasureEnum
 from app.core.constants.enums.user import UserRoles
 from app.core.security.password import hash_password
 from app.core.settings import config
 from app.db.configs.connection import AsyncDatabaseManager
-from app.db.models import UserModel
 from app.main import app
 
 
@@ -16,10 +14,8 @@ async def mock_db_session():
     test_db = AsyncDatabaseManager(config.TEST_DB_URL)
     test_db.connect()
     await test_db.create_tables()
-    async with test_db as session:
-
-        yield session
-
+    session = await test_db.get_session()
+    yield session
     await test_db.drop_tables()
     await session.close()
 
@@ -38,7 +34,7 @@ def mock_user_request():
         "name": "John Doe",
         "phone": "(89) 91111-2222",
         "email": "jhon.doe@gmail.com",
-        "password" : "SafePassword123@"
+        "password": "SafePassword123@",
     }
 
 
@@ -48,9 +44,10 @@ def mock_user_model():
         "name": "John Doe",
         "phone": "(89) 91111-2222",
         "email": "jhon.doe@gmail.com",
-        "password" : hash_password("SafePassword123@"),
-        "role": UserRoles.USER.value
+        "password": hash_password("SafePassword123@"),
+        "role": UserRoles.USER.value,
     }
+
 
 @fixture
 def mock_ingredient_model():
@@ -61,21 +58,13 @@ def mock_ingredient_model():
         "mark": "Fresh",
         "description": "Fresh and ripe tomatoes",
         "value": 3.5,
-        "min_quantity": 10
+        "min_quantity": 10,
     }
 
 
 @fixture
-def mock_user_employer_on_db_by_api(
-    mock_api: TestClient,
-    mock_user_request
-):
+def mock_user_employer_on_db_by_api(mock_api: TestClient, mock_user_request):
 
     api = mock_api
-    
-    response = api.post(
-        "/user/",
-        json=mock_user_request
-    )
-    
-    
+
+    response = api.post("/user/", json=mock_user_request)

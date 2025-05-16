@@ -26,7 +26,9 @@ async def test_user_service_get_success(mock_db_session, mock_user_request):
 
 
 @pytest.mark.asyncio
-async def test_user_service_get_fail_not_found(mock_db_session, mock_user_request):
+async def test_user_service_get_fail_not_found(
+    mock_db_session, mock_user_request
+):
 
     # Arrange
 

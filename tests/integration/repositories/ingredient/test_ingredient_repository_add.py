@@ -1,21 +1,22 @@
 from datetime import datetime
+
 from app.db.models import IngredientModel
 from app.db.repositories.ingredient import IngredientRepository
 
+
 async def test_ingredient_repository_add(
-    mock_db_session,
-    mock_ingredient_model
+    mock_db_session, mock_ingredient_model
 ) -> None:
-    
+
     # Arrange
-    
+
     repository = IngredientRepository(mock_db_session)
     model = IngredientModel(**mock_ingredient_model)
-    
+
     # Act
-    
+
     response = await repository.add(model)
-    
+
     assert isinstance(response, IngredientModel)
     assert response.id
     assert response.name == mock_ingredient_model["name"]

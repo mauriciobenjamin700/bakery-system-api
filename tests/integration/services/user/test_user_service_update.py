@@ -21,7 +21,6 @@ async def test_user_service_update_success(mock_db_session, mock_user_request):
     update.phone = "889123456789"
     update.password = "newPassword@"
 
-
     # Act
 
     response = await service.update(response_db.id, update)
@@ -36,7 +35,9 @@ async def test_user_service_update_success(mock_db_session, mock_user_request):
 
 
 @pytest.mark.asyncio
-async def test_user_service_update_fail_not_found(mock_db_session, mock_user_request):
+async def test_user_service_update_fail_not_found(
+    mock_db_session, mock_user_request
+):
 
     # Arrange
 

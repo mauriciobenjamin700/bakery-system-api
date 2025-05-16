@@ -7,7 +7,9 @@ from app.services.user import UserService
 
 
 @pytest.mark.asyncio
-async def test_user_service_get_all_success(mock_db_session, mock_user_request):
+async def test_user_service_get_all_success(
+    mock_db_session, mock_user_request
+):
 
     # Arrange
 

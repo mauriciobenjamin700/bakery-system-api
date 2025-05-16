@@ -18,10 +18,10 @@ def test_user_request_validation_success(mock_user_request):
 
     # Assert
 
-    assert request.name == clean_format_name(data.get('name'))
-    assert request.phone == clean_format_phone(data.get('phone'))
-    assert request.email == data.get('email')
-    assert request.password == data.get('password')
+    assert request.name == clean_format_name(data.get("name"))
+    assert request.phone == clean_format_phone(data.get("phone"))
+    assert request.email == data.get("email")
+    assert request.password == data.get("password")
 
 
 def test_user_request_validation_error_not_name(mock_user_request):
@@ -142,6 +142,7 @@ def test_user_request_validation_error_not_password(mock_user_request):
     assert error.value.field == "password"
     assert error.value.detail == ERROR_INVALID_FORMAT_TYPE_PASSWORD
 
+
 def test_user_request_validation_error_just_spaces_password(mock_user_request):
 
     # Arrange
@@ -159,7 +160,9 @@ def test_user_request_validation_error_just_spaces_password(mock_user_request):
     assert error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_MIN_LENGTH
 
 
-def test_user_request_validation_error_invalid_password_max_length(mock_user_request):
+def test_user_request_validation_error_invalid_password_max_length(
+    mock_user_request,
+):
 
     # Arrange
 
@@ -176,8 +179,9 @@ def test_user_request_validation_error_invalid_password_max_length(mock_user_req
     assert error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_MAX_LENGTH
 
 
-
-def test_user_request_validation_error_invalid_password_no_digit(mock_user_request):
+def test_user_request_validation_error_invalid_password_no_digit(
+    mock_user_request,
+):
 
     # Arrange
 
@@ -194,7 +198,9 @@ def test_user_request_validation_error_invalid_password_no_digit(mock_user_reque
     assert error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_DIGIT
 
 
-def test_user_request_validation_error_invalid_password_no_lower_case(mock_user_request):
+def test_user_request_validation_error_invalid_password_no_lower_case(
+    mock_user_request,
+):
 
     # Arrange
 
@@ -211,7 +217,9 @@ def test_user_request_validation_error_invalid_password_no_lower_case(mock_user_
     assert error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_LOWERCASE
 
 
-def test_user_request_validation_error_invalid_password_no_upper_case(mock_user_request):
+def test_user_request_validation_error_invalid_password_no_upper_case(
+    mock_user_request,
+):
 
     # Arrange
 
@@ -228,7 +236,9 @@ def test_user_request_validation_error_invalid_password_no_upper_case(mock_user_
     assert error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_UPPERCASE
 
 
-def test_user_request_validation_error_invalid_password_no_special_character(mock_user_request):
+def test_user_request_validation_error_invalid_password_no_special_character(
+    mock_user_request,
+):
 
     # Arrange
 
@@ -242,4 +252,6 @@ def test_user_request_validation_error_invalid_password_no_special_character(moc
     # Assert
 
     assert error.value.field == "password"
-    assert error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_SPECIAL_CHARACTER
+    assert (
+        error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_SPECIAL_CHARACTER
+    )
