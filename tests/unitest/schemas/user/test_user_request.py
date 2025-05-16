@@ -1,9 +1,10 @@
+from pydantic import ValidationError as PydanticValidationError
 from pytest import raises
 
 from app.core.constants.messages import *
 from app.core.errors import ValidationError
 from app.schemas.user import UserRequest
-from app.utils.format import clean_format_name, clean_format_phone
+from app.utils.validators import parse_phone
 
 
 def test_user_request_validation_success(mock_user_request):
@@ -18,8 +19,8 @@ def test_user_request_validation_success(mock_user_request):
 
     # Assert
 
-    assert request.name == clean_format_name(data.get("name"))
-    assert request.phone == clean_format_phone(data.get("phone"))
+    assert request.name == (data.get("name"))
+    assert request.phone == parse_phone(data.get("phone"))
     assert request.email == data.get("email")
     assert request.password == data.get("password")
 
@@ -33,12 +34,11 @@ def test_user_request_validation_error_not_name(mock_user_request):
 
     # Act
 
-    with raises(ValidationError) as error:
+    with raises(PydanticValidationError) as error:
         UserRequest(**data)
     # Assert
 
-    assert error.value.field == "name"
-    assert error.value.detail == ERROR_INVALID_FORMAT_TYPE_NAME
+    assert error.value.errors()[0]["loc"] == ("name",)
 
 
 def test_user_request_validation_error_just_spaces_name(mock_user_request):

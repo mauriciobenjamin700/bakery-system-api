@@ -1,14 +1,19 @@
 from datetime import datetime
-from re import match
 
 from pydantic import field_validator
 
 from app.core.constants.messages import *
 from app.core.errors import ValidationError
+from app.utils.validators import (
+    parse_date_to_string,
+    parse_email,
+    parse_phone,
+    parse_string,
+)
 
 
 @field_validator("created_at", mode="before")
-def validate_created_at(cls, value: datetime | str) -> str:
+def validate_created_at(cls, value: datetime | str) -> str | None:
     """
     A function that validates the created_at field.
 
@@ -19,20 +24,21 @@ def validate_created_at(cls, value: datetime | str) -> str:
         str: The created_at value.
     """
 
-    if not isinstance(value, (datetime, str)):
-        raise ValidationError(
-            field="created_at", detail=ERROR_INVALID_FORMAT_TYPE_DATE
-        )
+    return parse_date_to_string(value)
 
-    if isinstance(value, datetime):
-        value = value.strftime("%Y-%m-%d %H:%M:%S")
 
-    elif not match(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", value):
-        raise ValidationError(
-            field="created_at", detail=ERROR_DATE_INVALID_FORMAT_MASK
-        )
+@field_validator("description", mode="before")
+def validate_description(cls, value: str) -> str | None:
+    """
+    A function that validates the description field.
 
-    return value
+    - Args:
+        - cls: The class instance.
+        - value: The description value.
+    - Returns:
+        - str: The description value.
+    """
+    return parse_string(value)
 
 
 @field_validator("email", mode="before")
@@ -46,14 +52,16 @@ def validate_email(cls, value: str) -> str:
     - Returns:
         - str: The email value.
     """
+    value = parse_string(value)
+
     if not isinstance(value, str):
         raise ValidationError(
             field="email", detail=ERROR_INVALID_FORMAT_TYPE_EMAIL
         )
 
-    value = value.strip()
+    value = parse_email(value)
 
-    if not match(r"[^@]+@[^@]+\.[^@]+", value):
+    if not value:
         raise ValidationError(
             field="email", detail=ERROR_EMAIL_INVALID_FORMAT_MASK
         )
@@ -61,26 +69,18 @@ def validate_email(cls, value: str) -> str:
     return value
 
 
-@field_validator("id", mode="before")
-def validate_id(cls, value: str) -> str:
+@field_validator("mark", mode="before")
+def validate_mark(cls, value: str) -> str | None:
     """
-    A function that validates the id field.
+    A function that validates the mark field.
 
     - Args:
         - cls: The class instance.
-        - value: The id value.
+        - value: The mark value.
     - Returns:
-        - str: The id value.
+        - str: The mark value.
     """
-    if not isinstance(value, str):
-        raise ValidationError(field="id", detail=ERROR_INVALID_FORMAT_TYPE_ID)
-
-    value = value.strip()
-
-    if len(value) == 0:
-        raise ValidationError(field="id", detail=ERROR_REQUIRED_FIELD_ID)
-
-    return value
+    return parse_string(value)
 
 
 @field_validator("name", mode="before")
@@ -94,19 +94,12 @@ def validate_name(cls, value: str) -> str:
     - Returns:
         - str: The name value.
     """
-    if not isinstance(value, str):
-        raise ValidationError(
-            field="name", detail=ERROR_INVALID_FORMAT_TYPE_NAME
-        )
-
-    value = value.strip()
+    value = parse_string(value)
 
     if len(value) <= 1:
         raise ValidationError(
             field="name", detail=ERROR_NAME_INVALID_FORMAT_MIN_LENGTH
         )
-
-    value = value.upper()
 
     return value
 
@@ -122,12 +115,13 @@ def validate_password(cls, value: str) -> str:
     - Returns:
         - str: The password value.
     """
-    if not isinstance(value, str):
+
+    value = parse_string(value)
+
+    if not value:
         raise ValidationError(
             field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_TYPE
         )
-
-    value = value.strip()
 
     if len(value) < 8:
         raise ValidationError(
@@ -164,7 +158,7 @@ def validate_password(cls, value: str) -> str:
 
 
 @field_validator("phone", mode="before")
-def validate_phone(cls, value: str) -> str:
+def validate_phone(cls, value: str) -> str | None:
     """
     A function that validates the phone field.
 
@@ -174,14 +168,13 @@ def validate_phone(cls, value: str) -> str:
     - Returns:
         - str: The phone value.
     """
-    if not isinstance(value, str):
+    value = parse_string(value)
+    value = parse_phone(value)
+
+    if not value:
         raise ValidationError(
             field="phone", detail=ERROR_PHONE_INVALID_FORMAT_TYPE
         )
-
-    value = value.strip()
-
-    value = "".join([char for char in value if char.isdigit()])
 
     if len(value) < 11:
         raise ValidationError(
@@ -202,17 +195,12 @@ def validate_updated_at(cls, value: datetime | str) -> str:
     Returns
         str: The validated value.
     """
-    if not isinstance(value, (datetime, str)):
-        raise ValidationError(
-            field="created_at", detail=ERROR_INVALID_FORMAT_TYPE_DATE
-        )
+    value = parse_date_to_string(value)
 
-    if isinstance(value, datetime):
-        value = value.strftime("%Y-%m-%d %H:%M:%S")
+    if not value:
 
-    elif not match(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", value):
         raise ValidationError(
-            field="created_at", detail=ERROR_DATE_INVALID_FORMAT_MASK
+            field="updated_at", detail=ERROR_DATE_INVALID_FORMAT_MASK
         )
 
     return value

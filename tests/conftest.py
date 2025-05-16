@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi.testclient import TestClient
 from pytest import fixture
 
@@ -18,14 +20,6 @@ async def mock_db_session():
     yield session
     await test_db.drop_tables()
     await session.close()
-
-
-@fixture
-def mock_api():
-
-    client = TestClient(app)
-
-    return client
 
 
 @fixture
@@ -50,6 +44,19 @@ def mock_user_model():
 
 
 @fixture
+def mock_user_response():
+    return {
+        "id": "1",
+        "name": "John Doe",
+        "phone": "89911112222",
+        "email": "jhon.doe@gmail.com",
+        "role": UserRoles.USER.value,
+        "created_at": datetime.now(),
+        "updated_at": datetime.now(),
+    }
+
+
+@fixture
 def mock_ingredient_model():
     return {
         "name": "Tomato",
@@ -60,11 +67,3 @@ def mock_ingredient_model():
         "value": 3.5,
         "min_quantity": 10,
     }
-
-
-@fixture
-def mock_user_employer_on_db_by_api(mock_api: TestClient, mock_user_request):
-
-    api = mock_api
-
-    response = api.post("/user/", json=mock_user_request)

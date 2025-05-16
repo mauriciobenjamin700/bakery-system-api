@@ -5,7 +5,6 @@ from app.schemas.settings.base import BaseSchema
 from app.schemas.settings.validators import (
     validate_created_at,
     validate_email,
-    validate_id,
     validate_name,
     validate_password,
     validate_phone,
@@ -85,8 +84,6 @@ class UserResponse(UserBase):
     updated_at: str = Field(
         examples=["2023-10-01 12:00:00"], default=None, validate_default=True
     )
-
-    _id_validator = validate_id
     _created_at_validator = validate_created_at
     _updated_at_validator = validate_updated_at
 
