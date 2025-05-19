@@ -148,7 +148,9 @@ class IngredientBatchModel(Base):
         String, primary_key=True, default=id_generator
     )
     ingredient_id: Mapped[str] = mapped_column(
-        String, ForeignKey("ingredients.id"), nullable=False
+        String,
+        ForeignKey("ingredients.id", ondelete="CASCADE"),
+        nullable=False,
     )
     validity: Mapped[date] = mapped_column(TIMESTAMP, nullable=True)
     quantity: Mapped[float] = mapped_column(Float, default=0)
@@ -252,11 +254,13 @@ class PortionModel(Base):
         String, primary_key=True, default=id_generator
     )
     ingredient_id: Mapped[int] = mapped_column(
-        String, ForeignKey("ingredients.id"), nullable=False
+        String,
+        ForeignKey("ingredients.id", ondelete="CASCADE"),
+        nullable=False,
     )
     quantity: Mapped[float] = mapped_column(Float, nullable=False)
     product_id: Mapped[int] = mapped_column(
-        String, ForeignKey("products.id"), nullable=False
+        String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
     )
 
     ingredient = relationship(
@@ -287,7 +291,7 @@ class ProductBatchModel(Base):
         String, primary_key=True, default=id_generator
     )
     product_id: Mapped[str] = mapped_column(
-        String, ForeignKey("products.id"), nullable=False
+        String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
     )
     validity: Mapped[date] = mapped_column(Date, nullable=True)
     quantity: Mapped[float] = mapped_column(Float, default=0)
@@ -330,10 +334,10 @@ class SaleModel(Base):
         String, primary_key=True, default=id_generator
     )
     product_id: Mapped[str] = mapped_column(
-        String, ForeignKey("products.id"), nullable=False
+        String, ForeignKey("products.id", ondelete="SET NULL"), nullable=False
     )
     user_id: Mapped[str] = mapped_column(
-        String, ForeignKey("users.id"), nullable=False
+        String, ForeignKey("users.id", ondelete="SET NULL"), nullable=False
     )
     is_paid: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
