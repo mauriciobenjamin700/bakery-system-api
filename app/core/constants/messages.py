@@ -60,6 +60,10 @@ ERROR_DATABASE_USER_ALREADY_EXISTS = "Usuário já existe"
 ERROR_DATABASE_USER_NOT_FOUND = "Usuário não encontrado"
 ERROR_DATABASE_USERS_NOT_FOUND = "Usuários não encontrados"
 ERROR_DATABASE_INGREDIENT_ALREADY_EXISTS = "Ingrediente já cadastrado"
+ERROR_DATABASE_INGREDIENT_NOT_FOUND = "Ingrediente não encontrado"
+ERROR_DATABASE_INGREDIENT_BATCH_NOT_FOUND = (
+    "Lote de ingrediente não encontrado"
+)
 
 MESSAGE_USER_ADD_SUCCESS = "Usuário adicionado com sucesso"
 MESSAGE_USER_DELETE_SUCCESS = "Usuário deletado com sucesso"

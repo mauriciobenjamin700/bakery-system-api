@@ -75,7 +75,7 @@ class IngredientRequest(IngredientBase):
     )
 
 
-class IngredientBatchBase(IngredientBase):
+class IngredientBatchBase(BaseSchema):
     """
     Base schema for IngredientBatch
 

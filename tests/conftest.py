@@ -67,3 +67,25 @@ def mock_ingredient_model():
         "value": 3.5,
         "min_quantity": 10,
     }
+
+
+@fixture
+def mock_ingredient_request():
+    return {
+        "name": "Tomato",
+        "measure": IngredientMeasureEnum.KG.value,
+        "mark": "Fresh",
+        "description": "Fresh and ripe tomatoes",
+        "value": 3.5,
+        "min_quantity": 10,
+        "quantity": 20,
+    }
+
+
+@fixture
+def mock_ingredient_batch_request():
+    return {
+        "ingredient_id": "1",
+        "quantity": 20,
+        "validity": "2023-12-31",
+    }

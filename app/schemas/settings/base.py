@@ -9,9 +9,7 @@ class BaseSchema(BaseModel):
         - to_dict: Method to convert the model to a dictionary.
     """
 
-    def to_dict(
-        self, exclude: list = [], include: dict = {}, remove_none: str = True
-    ) -> dict:
+    def to_dict(self, exclude: list = [], include: dict = {}) -> dict:
         """
         Method to convert the model to a dictionary.
 
@@ -27,13 +25,11 @@ class BaseSchema(BaseModel):
         result = {}
 
         for key, value in data.items():
-            if key not in exclude:
-                result[key] = value
-            if remove_none and value is None:
-                pass
-            else:
+            if key not in exclude and key is not None:
                 result[key] = value
 
         result.update(include)
+
+        print("RESULT:", result)
 
         return result

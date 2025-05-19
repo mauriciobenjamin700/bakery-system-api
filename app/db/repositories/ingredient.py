@@ -7,6 +7,7 @@ from app.core.constants import messages
 from app.core.errors import (
     BadRequestError,
     ConflictError,
+    NotFoundError,
     ServerError,
     UnprocessableEntityError,
 )
@@ -171,10 +172,24 @@ class IngredientRepository:
             IngredientBatchModel: The added IngredientBatch model
         """
         try:
+
+            query = select(IngredientModel).where(
+                IngredientModel.id == model.ingredient_id
+            )
+            stmt = await self.db_session.execute(query)
+            ingredient = stmt.unique().one_or_none()
+            if not ingredient:
+                raise NotFoundError(
+                    messages.ERROR_DATABASE_INGREDIENT_NOT_FOUND
+                )
+
             self.db_session.add(model)
             await self.db_session.commit()
             await self.db_session.refresh(model)
             return model
+
+        except NotFoundError:
+            raise
 
         except Exception as e:
             await self.db_session.rollback()
@@ -267,7 +282,9 @@ class IngredientRepository:
             await self.db_session.commit()
 
             if result.rowcount == 0:
-                raise ConflictError("IngredientBatch not found")
+                raise NotFound(
+                    messages.ERROR_DATABASE_INGREDIENT_BATCH_NOT_FOUND
+                )
         else:
             raise UnprocessableEntityError("IngredientBatch not found")
 
@@ -287,7 +304,10 @@ class IngredientRepository:
             IngredientModel: The mapped model
         """
 
-        model = IngredientModel(**request.to_dict(), image_path=image_path)
+        model = IngredientModel(
+            **request.to_dict(exclude=["quantity", "validity"]),
+            image_path=image_path,
+        )
 
         return model
 
