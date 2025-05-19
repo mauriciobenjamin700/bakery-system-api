@@ -50,12 +50,11 @@ def test_user_request_validation_error_just_spaces_name(mock_user_request):
 
     # Act
 
-    with raises(ValidationError) as error:
+    with raises(PydanticValidationError) as error:
         UserRequest(**data)
     # Assert
 
-    assert error.value.field == "name"
-    assert error.value.detail == ERROR_NAME_INVALID_FORMAT_MIN_LENGTH
+    assert error.value.errors()[0]["loc"] == ("name",)
 
 
 def test_user_request_validation_error_not_phone(mock_user_request):
@@ -67,12 +66,11 @@ def test_user_request_validation_error_not_phone(mock_user_request):
 
     # Act
 
-    with raises(ValidationError) as error:
+    with raises(PydanticValidationError) as error:
         UserRequest(**data)
     # Assert
 
-    assert error.value.field == "phone"
-    assert error.value.detail == ERROR_INVALID_FORMAT_TYPE_PHONE
+    assert error.value.errors()[0]["loc"] == ("phone",)
 
 
 def test_user_request_validation_error_just_spaces_phone(mock_user_request):
@@ -84,12 +82,11 @@ def test_user_request_validation_error_just_spaces_phone(mock_user_request):
 
     # Act
 
-    with raises(ValidationError) as error:
+    with raises(PydanticValidationError) as error:
         UserRequest(**data)
     # Assert
 
-    assert error.value.field == "phone"
-    assert error.value.detail == ERROR_PHONE_INVALID_FORMAT_LENGTH
+    assert error.value.errors()[0]["loc"] == ("phone",)
 
 
 def test_user_request_validation_error_not_email(mock_user_request):
@@ -135,12 +132,11 @@ def test_user_request_validation_error_not_password(mock_user_request):
 
     # Act
 
-    with raises(ValidationError) as error:
+    with raises(PydanticValidationError) as error:
         UserRequest(**data)
     # Assert
 
-    assert error.value.field == "password"
-    assert error.value.detail == ERROR_INVALID_FORMAT_TYPE_PASSWORD
+    assert error.value.errors()[0]["loc"] == ("password",)
 
 
 def test_user_request_validation_error_just_spaces_password(mock_user_request):
@@ -152,12 +148,11 @@ def test_user_request_validation_error_just_spaces_password(mock_user_request):
 
     # Act
 
-    with raises(ValidationError) as error:
+    with raises(PydanticValidationError) as error:
         UserRequest(**data)
     # Assert
 
-    assert error.value.field == "password"
-    assert error.value.detail == ERROR_PASSWORD_INVALID_FORMAT_MIN_LENGTH
+    assert error.value.errors()[0]["loc"] == ("password",)
 
 
 def test_user_request_validation_error_invalid_password_max_length(

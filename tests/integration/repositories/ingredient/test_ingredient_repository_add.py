@@ -1,5 +1,9 @@
 from datetime import datetime
 
+import pytest
+
+from app.core.constants import messages
+from app.core.errors import ConflictError
 from app.db.models import IngredientModel
 from app.db.repositories.ingredient import IngredientRepository
 
@@ -28,3 +32,22 @@ async def test_ingredient_repository_add(
     assert response.min_quantity == mock_ingredient_model["min_quantity"]
     assert isinstance(response.created_at, datetime)
     assert isinstance(response.updated_at, datetime)
+
+
+async def test_ingredient_repository_add_already_exists(
+    mock_db_session, mock_ingredient_model
+):
+
+    # Arrange
+
+    repository = IngredientRepository(mock_db_session)
+    model = IngredientModel(**mock_ingredient_model)
+    await repository.add(model)
+
+    # Act
+
+    with pytest.raises(ConflictError) as e:
+        await repository.add(model)
+
+    assert e.value.detail == messages.ERROR_DATABASE_INGREDIENT_ALREADY_EXISTS
+    assert e.value.status_code == 409

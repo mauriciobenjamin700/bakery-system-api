@@ -96,10 +96,11 @@ def validate_name(cls, value: str) -> str:
     """
     value = parse_string(value)
 
-    if len(value) <= 1:
-        raise ValidationError(
-            field="name", detail=ERROR_NAME_INVALID_FORMAT_MIN_LENGTH
-        )
+    if value:
+        if len(value) <= 1:
+            raise ValidationError(
+                field="name", detail=ERROR_NAME_INVALID_FORMAT_MIN_LENGTH
+            )
 
     return value
 
@@ -118,41 +119,42 @@ def validate_password(cls, value: str) -> str:
 
     value = parse_string(value)
 
-    if not value:
-        raise ValidationError(
-            field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_TYPE
-        )
+    if value:
 
-    if len(value) < 8:
-        raise ValidationError(
-            field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_MIN_LENGTH
-        )
+        if len(value) < 8:
+            raise ValidationError(
+                field="password",
+                detail=ERROR_PASSWORD_INVALID_FORMAT_MIN_LENGTH,
+            )
 
-    if len(value) > 255:
-        raise ValidationError(
-            field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_MAX_LENGTH
-        )
+        if len(value) > 255:
+            raise ValidationError(
+                field="password",
+                detail=ERROR_PASSWORD_INVALID_FORMAT_MAX_LENGTH,
+            )
 
-    if not any(char.isdigit() for char in value):
-        raise ValidationError(
-            field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_DIGIT
-        )
+        if not any(char.isdigit() for char in value):
+            raise ValidationError(
+                field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_DIGIT
+            )
 
-    if not any(char.islower() for char in value):
-        raise ValidationError(
-            field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_LOWERCASE
-        )
+        if not any(char.islower() for char in value):
+            raise ValidationError(
+                field="password",
+                detail=ERROR_PASSWORD_INVALID_FORMAT_LOWERCASE,
+            )
 
-    if not any(char.isupper() for char in value):
-        raise ValidationError(
-            field="password", detail=ERROR_PASSWORD_INVALID_FORMAT_UPPERCASE
-        )
+        if not any(char.isupper() for char in value):
+            raise ValidationError(
+                field="password",
+                detail=ERROR_PASSWORD_INVALID_FORMAT_UPPERCASE,
+            )
 
-    if not any(char in "!@#$%&*()_+-=[]{};:,.<>?/" for char in value):
-        raise ValidationError(
-            field="password",
-            detail=ERROR_PASSWORD_INVALID_FORMAT_SPECIAL_CHARACTER,
-        )
+        if not any(char in "!@#$%&*()_+-=[]{};:,.<>?/" for char in value):
+            raise ValidationError(
+                field="password",
+                detail=ERROR_PASSWORD_INVALID_FORMAT_SPECIAL_CHARACTER,
+            )
 
     return value
 
@@ -169,17 +171,18 @@ def validate_phone(cls, value: str) -> str | None:
         - str: The phone value.
     """
     value = parse_string(value)
-    value = parse_phone(value)
+    if value:
+        value = parse_phone(value)
 
-    if not value:
-        raise ValidationError(
-            field="phone", detail=ERROR_PHONE_INVALID_FORMAT_TYPE
-        )
+        if not value:
+            raise ValidationError(
+                field="phone", detail=ERROR_PHONE_INVALID_FORMAT_TYPE
+            )
 
-    if len(value) < 11:
-        raise ValidationError(
-            field="phone", detail=ERROR_PHONE_INVALID_FORMAT_LENGTH
-        )
+        if len(value) < 11:
+            raise ValidationError(
+                field="phone", detail=ERROR_PHONE_INVALID_FORMAT_LENGTH
+            )
 
     return value
 

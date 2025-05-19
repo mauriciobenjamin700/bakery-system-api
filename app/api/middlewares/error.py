@@ -80,7 +80,7 @@ class CustomErrorMiddleware(BaseHTTPMiddleware):
 
             return JSONResponse(
                 status_code=e.status_code,
-                content={"detail": e.detail},
+                content={"detail": "Erro Interno no Servidor"},
             )
 
         except UnauthorizedError as e:

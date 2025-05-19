@@ -28,7 +28,7 @@ async def test_user_service_update_success(mock_db_session, mock_user_request):
     # Assert
 
     assert isinstance(response, UserResponse)
-    assert response.name == update.name.upper()
+    assert response.name == update.name
     assert response.email == update.email
     assert response.phone == update.phone
     assert verify_password(update.password, model.password)

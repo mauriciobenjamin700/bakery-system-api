@@ -3,7 +3,13 @@ from datetime import date
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import BadRequestError, UnprocessableEntityError
+from app.core.constants import messages
+from app.core.errors import (
+    BadRequestError,
+    ConflictError,
+    ServerError,
+    UnprocessableEntityError,
+)
 from app.db.models import IngredientBatchModel, IngredientModel
 from app.schemas.ingredient import (
     IngredientBatchRequest,
@@ -42,14 +48,35 @@ class IngredientRepository:
         """
 
         try:
+
+            query = select(IngredientModel).where(
+                IngredientModel.name == model.name,
+                IngredientModel.measure == model.measure,
+                IngredientModel.mark == model.mark,
+                IngredientModel.description == model.description,
+                IngredientModel.value == model.value,
+            )
+
+            stmt = await self.db_session.execute(query)
+
+            on_db = stmt.unique().one_or_none()
+
+            if on_db:
+                raise ConflictError(
+                    messages.ERROR_DATABASE_INGREDIENT_ALREADY_EXISTS
+                )
+
             self.db_session.add(model)
             await self.db_session.commit()
             await self.db_session.refresh(model)
             return model
 
+        except ConflictError:
+            raise
+
         except Exception as e:
             await self.db_session.rollback()
-            raise BadRequestError(str(e))
+            raise ServerError(str(e))
 
     async def get(
         self, id: str = None, name: str = None, all_results=False
