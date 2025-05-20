@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -76,7 +78,7 @@ class ProductRepository:
 
     async def get(
         self, product_id: str | None = None
-    ) -> ProductModel | list[ProductModel] | None:
+    ) -> ProductModel | Sequence[ProductModel] | None:
         """
         Get a product by its ID.
 
@@ -174,7 +176,7 @@ class ProductRepository:
         portion_id: str | None = None,
         product_id: str | None = None,
         all_results: bool = False,
-    ) -> PortionModel | list[PortionModel] | None:
+    ) -> PortionModel | Sequence[PortionModel] | None:
         """
         Get a portion by its ID.
 
@@ -272,7 +274,7 @@ class ProductRepository:
         product_batch_id: str | None = None,
         product_id: str | None = None,
         all_results: bool = False,
-    ) -> ProductBatchModel | list[ProductBatchModel] | None:
+    ) -> ProductBatchModel | Sequence[ProductBatchModel] | None:
         """
         Get a product batch by its ID.
 
@@ -411,9 +413,15 @@ class ProductRepository:
             ProductResponse: The mapped product response.
         """
 
-        batch_models = await self.get_product_batch(
+        batch_models_result = await self.get_product_batch(
             product_id=model.id, all_results=True
         )
+        if batch_models_result is None:
+            batch_models: Sequence[ProductBatchModel] = []
+        elif isinstance(batch_models_result, ProductBatchModel):
+            batch_models: Sequence[ProductBatchModel] = [batch_models_result]
+        else:
+            batch_models: Sequence[ProductBatchModel] = batch_models_result
 
         quantity = 0
         batches = None

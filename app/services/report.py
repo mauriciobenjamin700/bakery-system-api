@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Sequence
 
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,13 +37,13 @@ class ReportService:
 
         response = {}
 
-        products: list[ProductModel] = await self.product_repository.get()
+        products: Sequence[ProductModel] = await self.product_repository.get()  # type: ignore
 
         if products is None:
             raise NotFoundError("No products found")
 
         sales: list[SaleModel] = await self.sale_repository.get(
-            all_results=True
+            all_results=True  # type: ignore
         )
 
         if not sales:

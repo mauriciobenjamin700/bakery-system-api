@@ -21,7 +21,7 @@ class Base(AsyncAttrs, DeclarativeBase):
         return f"{cls.__name__}({columns_str})"
 
     def to_dict(
-        self, exclude: list = [], include: dict = {}, remove_none: str = False
+        self, exclude: list = [], include: dict = {}, remove_none: bool = False
     ) -> dict:
         """
         Method to convert the model to a dictionary.

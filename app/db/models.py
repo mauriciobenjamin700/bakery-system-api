@@ -259,7 +259,7 @@ class PortionModel(Base):
         nullable=False,
     )
     quantity: Mapped[float] = mapped_column(Float, nullable=False)
-    product_id: Mapped[int] = mapped_column(
+    product_id: Mapped[str] = mapped_column(
         String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
     )
 

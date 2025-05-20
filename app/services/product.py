@@ -102,7 +102,7 @@ class ProductService:
             raise NotFoundError(f"Product with ID {product_id} not found.")
 
         response = await self.repository.map_product_model_to_response(
-            product_model
+            product_model  # type: ignore
         )
 
         return response
@@ -122,7 +122,7 @@ class ProductService:
 
         response = []
 
-        for model in product_models:
+        for model in product_models:  # type: ignore
             result = await self.repository.map_product_model_to_response(model)
             response.append(result)
 
@@ -151,7 +151,7 @@ class ProductService:
             if value is not None:
                 setattr(product_model, key, value)
 
-        product_model = await self.repository.update(product_model)
+        product_model = await self.repository.update(product_model)  # type: ignore
 
         response = await self.repository.map_product_model_to_response(
             product_model
@@ -173,7 +173,7 @@ class ProductService:
         await self.repository.delete(product_id=product_id)
 
         return Message(
-            message=f"Product with ID {product_id} deleted successfully."
+            detail=f"Product with ID {product_id} deleted successfully."
         )
 
     async def add_product_batch(
@@ -200,7 +200,7 @@ class ProductService:
         )
 
         response = await self.repository.map_product_model_to_response(
-            product_model
+            product_model  # type: ignore
         )
 
         return response
@@ -232,14 +232,14 @@ class ProductService:
             if value is not None:
                 setattr(batch_model, key, value)
 
-        batch_model = await self.repository.update_product_batch(batch_model)
+        batch_model = await self.repository.update_product_batch(batch_model)  # type: ignore
 
         product_model = await self.repository.get(
             product_id=batch_model.product_id
         )
 
         response = await self.repository.map_product_model_to_response(
-            product_model
+            product_model  # type: ignore
         )
 
         return response
@@ -260,7 +260,7 @@ class ProductService:
         )
 
         return Message(
-            message=f"Product batch with ID {product_batch_id} deleted successfully."
+            detail=f"Product batch with ID {product_batch_id} deleted successfully."
         )
 
     async def add_recipe(self, request: RecipeRequest) -> ProductResponse:
@@ -288,7 +288,7 @@ class ProductService:
         await self.repository.add_portion(portion_models)
 
         response = await self.repository.map_product_model_to_response(
-            product_model
+            product_model  # type: ignore
         )
 
         return response
@@ -314,16 +314,16 @@ class ProductService:
         if not portion_model:
             raise NotFoundError(f"Portion with ID {portion_id} not found.")
 
-        portion_model.quantity = new_quantity
+        portion_model.quantity = new_quantity  # type: ignore
 
-        await self.repository.update_portion(portion_model)
+        await self.repository.update_portion(portion_model)  # type: ignore
 
         product_model = await self.repository.get(
-            product_id=portion_model.product_id
+            product_id=portion_model.product_id  # type: ignore
         )
 
         response = await self.repository.map_product_model_to_response(
-            product_model
+            product_model  # type: ignore
         )
 
         return response
@@ -342,5 +342,5 @@ class ProductService:
         await self.repository.delete_portion(portion_id=portion_id)
 
         return Message(
-            message=f"Portion with ID {portion_id} deleted successfully."
+            detail=f"Portion with ID {portion_id} deleted successfully."
         )

@@ -46,6 +46,7 @@ class IngredientService:
     async def add(
         self,
         request: IngredientRequest,
+        image_path: str,
     ) -> IngredientResponse:
         """
         Add a new ingredient to the database.
@@ -57,7 +58,7 @@ class IngredientService:
             IngredientResponse: The added ingredient.
         """
 
-        model = self.repository.map_request_to_model(request)
+        model = self.repository.map_request_to_model(request, image_path)
 
         ingredient = await self.repository.add(model)
 
@@ -94,7 +95,7 @@ class IngredientService:
                 "Ingredient not found",
             )
 
-        response = await self.repository.map_model_to_response(ingredient)
+        response = await self.repository.map_model_to_response(ingredient)  # type: ignore
 
         return response
 
@@ -108,14 +109,17 @@ class IngredientService:
             list[IngredientResponse]: A list of all ingredients.
         """
 
-        ingredients = await self.repository.get(all=True)
+        ingredients = await self.repository.get(all_results=True)
 
         if not ingredients:
             raise NotFoundError(
                 "No ingredients found",
             )
 
-        response = await self.repository.map_model_to_response(ingredients)
+        response = [
+            await self.repository.map_model_to_response(ingredient)
+            for ingredient in ingredients  # type: ignore
+        ]
 
         return response
 
@@ -148,7 +152,7 @@ class IngredientService:
             if value is not None:
                 setattr(ingredient, key, value)
 
-        ingredient = await self.repository.update(ingredient)
+        ingredient = await self.repository.update(ingredient)  # type: ignore
 
         response = await self.repository.map_model_to_response(ingredient)
 
@@ -225,9 +229,9 @@ class IngredientService:
             if value is not None:
                 setattr(batch, key, value)
 
-        batch = await self.repository.update_batch(batch)
+        batch = await self.repository.update_batch(batch)  # type: ignore
 
-        response = await self.repository.map_batch_model_to_response(batch)
+        response = await self.repository.map_batch_model_to_response(batch)  # type: ignore
 
         return response
 

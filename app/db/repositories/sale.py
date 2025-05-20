@@ -1,7 +1,9 @@
+from typing import Sequence
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import NotFoundError, ValidationError
+from app.core.errors import BadRequestError, NotFoundError
 from app.db.models import ProductBatchModel, ProductModel, SaleModel, UserModel
 from app.schemas import SaleRequest, SaleResponse
 
@@ -108,7 +110,7 @@ class SaleRepository:
         product_id: str | None = None,
         sale_code: str | None = None,
         all_results: bool = False,
-    ) -> SaleModel | list[SaleModel] | None:
+    ) -> SaleModel | Sequence[SaleModel] | None:
         """
         Async method to get SaleModel(s) from the database.
 
@@ -183,7 +185,7 @@ class SaleRepository:
         """
 
         if not id and not model:
-            raise ValidationError("ID or model must be provided")
+            raise BadRequestError("ID or model must be provided")
 
         if model:
             query = delete(SaleModel).where(SaleModel.id == model.id)
@@ -198,7 +200,7 @@ class SaleRepository:
 
     async def get_sale_note_data(
         self, sale_code: str
-    ) -> tuple[UserModel, list[ProductModel], list[SaleModel]] | None:
+    ) -> tuple[UserModel, Sequence[ProductModel], Sequence[SaleModel]] | None:
         """
         Get a sale note for a given sale code.
         Args:
@@ -207,12 +209,15 @@ class SaleRepository:
             tuple: A tuple containing the products, user, and total value of the sale.
         """
 
-        sales: list[SaleModel] = await self.get(
-            sale_code=sale_code, all_results=True
-        )
+        result = await self.get(sale_code=sale_code, all_results=True)
 
-        if not sales:
+        if not result:
             return None
+
+        if isinstance(result, list) or isinstance(result, Sequence):
+            sales: list[SaleModel] = list(result)
+        else:
+            sales: list[SaleModel] = [result]
 
         product_ids = [model.product_id for model in sales]
         user_id = sales[0].user_id
@@ -228,6 +233,9 @@ class SaleRepository:
         result = await self.db_session.execute(query)
 
         employee = result.unique().scalar_one_or_none()
+
+        if employee is None:
+            return None
 
         return employee, products, sales
 
@@ -273,5 +281,5 @@ class SaleRepository:
         """
 
         return SaleResponse(
-            model.to_dict(),
+            **model.to_dict(),
         )

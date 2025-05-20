@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Sequence
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -80,8 +81,8 @@ class IngredientRepository:
             raise ServerError(str(e))
 
     async def get(
-        self, id: str = None, name: str = None, all_results=False
-    ) -> None | IngredientModel | list[IngredientModel]:
+        self, id: str | None = None, name: str | None = None, all_results=False
+    ) -> None | IngredientModel | Sequence[IngredientModel]:
         """
         Get an Ingredient from the database by id or name. If all_results is True, return all results found in the database.
 
@@ -97,7 +98,7 @@ class IngredientRepository:
                 result = await self.db_session.execute(
                     select(IngredientModel).where(IngredientModel.name == name)
                 )
-                return result.unique().scalars().all
+                return result.unique().scalars().all()
             result = await self.db_session.execute(select(IngredientModel))
             return result.unique().scalars().all()
 
@@ -132,7 +133,7 @@ class IngredientRepository:
         return model
 
     async def delete(
-        self, model: IngredientModel = None, id: str = None
+        self, model: IngredientModel | None = None, id: str | None = None
     ) -> None:
         """
         Delete an Ingredient from the database. If model is provided, delete the model. If id is provided, delete the model with the id.
@@ -196,8 +197,11 @@ class IngredientRepository:
             raise BadRequestError(str(e))
 
     async def get_batch(
-        self, id: str = None, ingredient_id: str = None, all_results=False
-    ) -> None | IngredientBatchModel | list[IngredientBatchModel]:
+        self,
+        id: str | None = None,
+        ingredient_id: str | None = None,
+        all_results=False,
+    ) -> None | IngredientBatchModel | Sequence[IngredientBatchModel]:
         """
         Get an IngredientBatch from the database by id or ingredient_id. If all_results is True, return all results found in the database.
 
@@ -259,7 +263,7 @@ class IngredientRepository:
         return model
 
     async def delete_batch(
-        self, model: IngredientBatchModel = None, id: str = None
+        self, model: IngredientBatchModel | None = None, id: str | None = None
     ) -> None:
         """
         Delete an IngredientBatch from the database. If model is provided, delete the model. If id is provided, delete the model with the id.
@@ -282,7 +286,7 @@ class IngredientRepository:
             await self.db_session.commit()
 
             if result.rowcount == 0:
-                raise NotFound(
+                raise NotFoundError(
                     messages.ERROR_DATABASE_INGREDIENT_BATCH_NOT_FOUND
                 )
         else:
@@ -341,7 +345,7 @@ class IngredientRepository:
 
     @staticmethod
     def create_ingredient_batch(
-        ingredient_id: str, validity: date, quantity: float
+        ingredient_id: str, validity: date | None, quantity: float
     ) -> IngredientBatchModel:
         """
         A static method to build a IngredientBatch model by passing the ingredient_id, validity and quantity
