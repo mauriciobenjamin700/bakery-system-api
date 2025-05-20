@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pytest import fixture
 
-from app.core.constants.enums.ingredient import IngredientMeasureEnum
+from app.core.constants.enums.base import MeasureEnum
 from app.core.constants.enums.user import UserRoles
 from app.core.security.password import hash_password
 from app.core.settings import config
@@ -58,7 +58,7 @@ def mock_user_response():
 def mock_ingredient_model():
     return {
         "name": "Tomato",
-        "measure": IngredientMeasureEnum.KG.value,
+        "measure": MeasureEnum.KG.value,
         "image_path": "https://example.com/tomato.jpg",
         "mark": "Fresh",
         "description": "Fresh and ripe tomatoes",
@@ -71,7 +71,7 @@ def mock_ingredient_model():
 def mock_ingredient_request():
     return {
         "name": "Tomato",
-        "measure": IngredientMeasureEnum.KG.value,
+        "measure": MeasureEnum.KG.value,
         "mark": "Fresh",
         "description": "Fresh and ripe tomatoes",
         "value": 3.5,
@@ -84,7 +84,7 @@ def mock_ingredient_request():
 def mock_ingredient_update():
     return {
         "name": "Tomate",
-        "measure": IngredientMeasureEnum.KG.value,
+        "measure": MeasureEnum.KG.value,
         "mark": "Fresh",
         "description": "Fresh and ripe tomatoes",
         "value": 5.0,
@@ -106,4 +106,19 @@ def mock_ingredient_batch_update():
     return {
         "quantity": 30,
         "validity": "2026-01-31",
+    }
+
+
+@fixture
+def mock_product_request_with_no_recipe():
+    return {
+        "name": "Test Product",
+        "price_cost": 0.25,
+        "price_sale": 1,
+        "measure": MeasureEnum.KG.value,
+        "description": "This is a test product",
+        "mark": "Test Mark",
+        "min_quantity": 10,
+        "quantity": 20,
+        "validity": "2026-12-31",
     }

@@ -13,7 +13,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.constants.enums.ingredient import IngredientMeasureEnum
+from app.core.constants.enums.base import MeasureEnum
 from app.core.constants.enums.user import UserRoles
 from app.core.generate.ids import id_generator
 from app.db.configs.base import Base
@@ -94,9 +94,7 @@ class IngredientModel(Base):
         String, primary_key=True, default=id_generator
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
-    measure: Mapped[str] = mapped_column(
-        Enum(IngredientMeasureEnum), nullable=False
-    )
+    measure: Mapped[str] = mapped_column(Enum(MeasureEnum), nullable=False)
     image_path: Mapped[str] = mapped_column(String, nullable=True)
     mark: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
@@ -183,9 +181,7 @@ class ProductModel(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     price_cost: Mapped[float] = mapped_column(Float, default=0)
     price_sale: Mapped[float] = mapped_column(Float, nullable=False)
-    measure: Mapped[str] = mapped_column(
-        Enum(IngredientMeasureEnum), nullable=False
-    )
+    measure: Mapped[str] = mapped_column(Enum(MeasureEnum), nullable=False)
     image_path: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     mark: Mapped[str] = mapped_column(String, nullable=True)

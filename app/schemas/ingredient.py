@@ -2,7 +2,7 @@ import datetime
 
 from pydantic import Field
 
-from app.core.constants.enums.ingredient import IngredientMeasureEnum
+from app.core.constants.enums.base import MeasureEnum
 from app.schemas.settings import validators
 from app.schemas.settings.base import BaseSchema
 
@@ -13,7 +13,7 @@ class IngredientBase(BaseSchema):
 
     Attributes:
         name (str): The name of the ingredient
-        measure (IngredientMeasureEnum): The measure of the ingredient
+        measure (MeasureEnum): The measure of the ingredient
         mark (str): The mark of the ingredient
         description (str): The description of the ingredient
         value (float): The value of the ingredient
@@ -22,11 +22,11 @@ class IngredientBase(BaseSchema):
     """
 
     name: str = Field(examples=["Farinha de trigo", "Açúcar", "Sal"])
-    measure: IngredientMeasureEnum = Field(
+    measure: MeasureEnum = Field(
         examples=[
-            IngredientMeasureEnum.KG,
-            IngredientMeasureEnum.L,
-            IngredientMeasureEnum.UNITY,
+            MeasureEnum.KG,
+            MeasureEnum.L,
+            MeasureEnum.UNITY,
         ]
     )
     mark: str | None = Field(
@@ -60,7 +60,7 @@ class IngredientRequest(IngredientBase):
 
     Attributes:
         name (str): The name of the ingredient
-        measure (IngredientMeasureEnum): The measure of the ingredient
+        measure (MeasureEnum): The measure of the ingredient
         mark (str): The mark of the ingredient
         description (str): The description of the ingredient
         value (float): The value of the ingredient
@@ -81,7 +81,7 @@ class IngredientUpdate(IngredientBase):
 
     Attributes:
         name (str): The name of the ingredient
-        measure (IngredientMeasureEnum): The measure of the ingredient
+        measure (MeasureEnum): The measure of the ingredient
         mark (str): The mark of the ingredient
         description (str): The description of the ingredient
         value (float): The value of the ingredient

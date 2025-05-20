@@ -55,7 +55,9 @@ class ProductService:
     def __init__(self, session: AsyncSession):
         self.repository = ProductRepository(session)
 
-    async def add(self, request: ProductRequest) -> ProductResponse:
+    async def add(
+        self, request: ProductRequest, image_path: str
+    ) -> ProductResponse:
         """
         Add a new product to the database.
 
@@ -67,7 +69,7 @@ class ProductService:
         """
 
         product_model, portion_models, batch_model = (
-            self.repository.map_product_request_to_model(request)
+            self.repository.map_product_request_to_model(request, image_path)
         )
 
         product_model = await self.repository.add(product_model)

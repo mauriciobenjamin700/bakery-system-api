@@ -356,7 +356,7 @@ class ProductRepository:
 
     @staticmethod
     def map_product_request_to_model(
-        request: ProductRequest,
+        request: ProductRequest, image_path: str
     ) -> tuple[ProductModel, list[PortionModel], ProductBatchModel]:
         """
         Map a product request to a product model.
@@ -372,6 +372,7 @@ class ProductRepository:
                 exclude=["recipe", "quantity"],
                 include={
                     "id": id_generator(),
+                    "image_path": image_path,
                 },
             )
         )

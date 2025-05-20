@@ -17,17 +17,39 @@ class ProductBase(BaseSchema):
         price_sale (float): The sale price of the product.
         measure (MeasureEnum): The measure of the product.
         description (str): The description of the product.
-        mark (str): The mark of the product.
-        min_quantity (float): The minimum quantity of the product.
+        mark (str | None): The mark of the product.
+        min_quantity (float | None): The minimum quantity of the product.
     """
 
-    name: str
-    price_cost: float
-    price_sale: float
+    name: str = Field(
+        examples=["Farinha de trigo", "Açúcar", "Sal"],
+        description="Name of the product",
+    )
+    price_cost: float = Field(
+        examples=[1.5, 2.0, 3.0], ge=0, description="Cost price of the product"
+    )
+    price_sale: float = Field(
+        examples=[1.5, 2.0, 3.0], ge=0, description="Sale price of the product"
+    )
     measure: MeasureEnum
-    description: str
-    mark: str
-    min_quantity: float
+    description: str = Field(
+        examples=[
+            "Farinha de trigo para bolos",
+            "Açúcar cristal",
+            "Sal refinado",
+        ]
+    )
+    mark: str | None = Field(
+        examples=["Marca A", "Marca B", "Marca C"],
+        default=None,
+        description="Mark of the product",
+    )
+    min_quantity: float | None = Field(
+        examples=[0.5, 1.0, 2.0],
+        ge=0,
+        default=None,
+        description="Minimum quantity of the product",
+    )
 
 
 class BasePortion(BaseSchema):
@@ -87,8 +109,14 @@ class ProductRequest(ProductBase):
     """
 
     recipe: list[PortionRequest] | None = None
-    quantity: float
-    validity: date | None = None
+    quantity: float = Field(
+        examples=[0.5, 1.0, 2.0], ge=0, description="Quantity of the product"
+    )
+    validity: date | None = Field(
+        examples=["2025-10-02", "2025-12-31"],
+        description="Validity date of the product",
+        default=None,
+    )
 
 
 class ProductUpdate(BaseSchema):
