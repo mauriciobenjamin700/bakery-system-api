@@ -48,7 +48,6 @@ class IngredientBase(BaseSchema):
         ge=0,
     )
     min_quantity: float = Field(examples=[0.5, 1.0, 2.0], ge=0)
-    quantity: float = Field(examples=[10.0, 20.0, 30.0], ge=0)
 
     _validate_name = validators.validate_name
     _validate_mark = validators.validate_mark
@@ -70,9 +69,27 @@ class IngredientRequest(IngredientBase):
         quantity (float): The quantity of the ingredient
     """
 
+    quantity: float = Field(examples=[10.0, 20.0, 30.0], ge=0)
     validity: datetime.date | None = Field(
         examples=["2023-12-31", "2024-01-01", "2024-02-28"], default=None
     )
+
+
+class IngredientUpdate(IngredientBase):
+    """
+    A schema with data to update an ingredient on db
+
+    Attributes:
+        name (str): The name of the ingredient
+        measure (IngredientMeasureEnum): The measure of the ingredient
+        mark (str): The mark of the ingredient
+        description (str): The description of the ingredient
+        value (float): The value of the ingredient
+        min_quantity (float): The minimum quantity of the ingredient
+        validity (date | None): The validity of the ingredient
+    """
+
+    pass
 
 
 class IngredientBatchBase(BaseSchema):
@@ -159,6 +176,9 @@ class IngredientResponse(IngredientBase):
         min_quantity (float): The minimum quantity of the ingredient
         quantity (float): The quantity of the ingredient
         image_path (str): The path to the image of the ingredient
+        created_at (str): The date and time when the ingredient was created
+        updated_at (str): The date and time when the ingredient was last updated
+        batches (list[IngredientBatchResponse]): The list of batches of the ingredient
     """
 
     id: str = Field(
@@ -172,4 +192,24 @@ class IngredientResponse(IngredientBase):
         ],
         default=None,
     )
+    quantity: float = Field(examples=[10.0, 20.0, 30.0], ge=0)
+    created_at: str = Field(
+        description="A data e hora em que o ingrediente foi criado",
+        examples=[
+            "2023-12-31 12:00",
+            "2024-01-01 12:00",
+            "2024-02-28 12:00",
+        ],
+    )
+    updated_at: str = Field(
+        description="A data e hora em que o ingrediente foi atualizado",
+        examples=[
+            "2023-12-31 12:00",
+            "2024-01-01 12:00",
+            "2024-02-28 12:00",
+        ],
+    )
     batches: list[IngredientBatchResponse]
+
+    _validate_created_at = validators.validate_created_at
+    _validate_updated_at = validators.validate_updated_at

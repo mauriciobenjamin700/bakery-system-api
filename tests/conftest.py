@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from fastapi.testclient import TestClient
 from pytest import fixture
 
 from app.core.constants.enums.ingredient import IngredientMeasureEnum
@@ -8,7 +7,6 @@ from app.core.constants.enums.user import UserRoles
 from app.core.security.password import hash_password
 from app.core.settings import config
 from app.db.configs.connection import AsyncDatabaseManager
-from app.main import app
 
 
 @fixture
@@ -79,6 +77,18 @@ def mock_ingredient_request():
         "value": 3.5,
         "min_quantity": 10,
         "quantity": 20,
+    }
+
+
+@fixture
+def mock_ingredient_update():
+    return {
+        "name": "Tomate",
+        "measure": IngredientMeasureEnum.KG.value,
+        "mark": "Fresh",
+        "description": "Fresh and ripe tomatoes",
+        "value": 5.0,
+        "min_quantity": 20,
     }
 
 

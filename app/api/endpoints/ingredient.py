@@ -54,7 +54,7 @@ async def get_ingredients(
     """
     service = IngredientService(session)
     if ingredient_id:
-        ingredients = await service.get(ingredient_id)
+        ingredients = await service.get_by_id(ingredient_id)
         return [ingredients]
     ingredients = await service.get_all()
     return ingredients

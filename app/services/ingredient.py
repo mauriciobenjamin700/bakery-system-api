@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants import messages
 from app.core.errors import NotFoundError
 from app.db.repositories.ingredient import IngredientRepository
 from app.schemas.ingredient import (
@@ -7,6 +8,7 @@ from app.schemas.ingredient import (
     IngredientBatchResponse,
     IngredientRequest,
     IngredientResponse,
+    IngredientUpdate,
 )
 from app.schemas.message import Message
 
@@ -74,7 +76,7 @@ class IngredientService:
 
         return response
 
-    async def get(
+    async def get_by_id(
         self,
         ingredient_id: str,
     ) -> IngredientResponse:
@@ -92,7 +94,7 @@ class IngredientService:
 
         if not ingredient:
             raise NotFoundError(
-                "Ingredient not found",
+                messages.ERROR_DATABASE_INGREDIENT_NOT_FOUND,
             )
 
         response = await self.repository.map_model_to_response(ingredient)  # type: ignore
@@ -113,7 +115,7 @@ class IngredientService:
 
         if not ingredients:
             raise NotFoundError(
-                "No ingredients found",
+                messages.ERROR_DATABASE_INGREDIENTS_NOT_FOUND,
             )
 
         response = [
@@ -126,14 +128,14 @@ class IngredientService:
     async def update(
         self,
         ingredient_id: str,
-        request: IngredientRequest,
+        request: IngredientUpdate,
     ) -> IngredientResponse:
         """
         Update an ingredient by its ID.
 
         Args:
             ingredient_id (str): The ID of the ingredient to update.
-            ingredient (IngredientRequest): The updated ingredient data.
+            ingredient (IngredientUpdate): The updated ingredient data.
 
         Returns:
             IngredientResponse: The updated ingredient.
@@ -143,7 +145,7 @@ class IngredientService:
 
         if not ingredient:
             raise NotFoundError(
-                "Ingredient not found",
+                messages.ERROR_DATABASE_INGREDIENT_NOT_FOUND,
             )
 
         for key, value in request.to_dict(
@@ -174,9 +176,7 @@ class IngredientService:
 
         await self.repository.delete(id=ingredient_id)
 
-        return Message(
-            detail="Ingredient deleted successfully",
-        )
+        return Message(detail=messages.MESSAGE_INGREDIENT_DELETE_SUCCESS)
 
     async def add_batch(
         self,
@@ -220,12 +220,10 @@ class IngredientService:
 
         if not batch:
             raise NotFoundError(
-                "Batch not found",
+                messages.ERROR_DATABASE_INGREDIENT_BATCH_NOT_FOUND,
             )
 
-        for key, value in request.to_dict(
-            exclude=["quantity", "validity"]
-        ).items():
+        for key, value in request.to_dict(exclude=["ingredient_id"]).items():
             if value is not None:
                 setattr(batch, key, value)
 

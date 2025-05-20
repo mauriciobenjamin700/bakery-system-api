@@ -11,7 +11,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.constants.enums.ingredient import IngredientMeasureEnum
 from app.core.constants.enums.user import UserRoles
@@ -114,19 +114,6 @@ class IngredientModel(Base):
         onupdate=datetime.now,
     )
 
-    ingredients_batch = relationship(
-        "IngredientBatchModel",
-        back_populates="ingredient",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
-    portions = relationship(
-        "PortionModel",
-        back_populates="ingredient",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
-
 
 class IngredientBatchModel(Base):
     """
@@ -166,10 +153,6 @@ class IngredientBatchModel(Base):
         server_default=func.now(),
         default=datetime.now,
         onupdate=func.now(),
-    )
-
-    ingredient = relationship(
-        "IngredientModel", back_populates="ingredients_batch"
     )
 
 
@@ -221,19 +204,6 @@ class ProductModel(Base):
         onupdate=func.now(),
     )
 
-    products_batch = relationship(
-        "ProductBatchModel",
-        back_populates="product",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
-    portions = relationship(
-        "PortionModel",
-        back_populates="product",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
-
 
 class PortionModel(Base):
     """
@@ -261,13 +231,6 @@ class PortionModel(Base):
     quantity: Mapped[float] = mapped_column(Float, nullable=False)
     product_id: Mapped[str] = mapped_column(
         String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
-    )
-
-    ingredient = relationship(
-        "IngredientModel", back_populates="portions", uselist=False
-    )
-    product = relationship(
-        "ProductModel", back_populates="portions", uselist=False
     )
 
 
@@ -307,9 +270,6 @@ class ProductBatchModel(Base):
         server_default=func.now(),
         default=datetime.now,
         onupdate=func.now(),
-    )
-    product = relationship(
-        "ProductModel", back_populates="products_batch", uselist=False
     )
 
 

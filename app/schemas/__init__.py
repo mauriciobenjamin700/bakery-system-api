@@ -3,6 +3,7 @@ from .ingredient import (
     IngredientBatchResponse,
     IngredientRequest,
     IngredientResponse,
+    IngredientUpdate,
 )
 from .message import Message
 from .product import (
@@ -21,6 +22,7 @@ from .user import LoginRequest, TokenResponse, UserRequest, UserResponse
 
 __all__ = [
     "IngredientRequest",
+    "IngredientUpdate",
     "IngredientResponse",
     "IngredientBatchRequest",
     "IngredientBatchResponse",

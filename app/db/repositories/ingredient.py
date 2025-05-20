@@ -327,7 +327,12 @@ class IngredientRepository:
             IngredientResponse: The mapped response
         """
 
-        batches = model.ingredients_batch
+        batches = await self.db_session.execute(
+            select(IngredientBatchModel).where(
+                IngredientBatchModel.ingredient_id == model.id
+            )
+        )
+        batches = batches.unique().scalars().all()
 
         quantity = 0
 
