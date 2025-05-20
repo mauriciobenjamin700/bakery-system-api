@@ -1,6 +1,7 @@
 from .ingredient import (
     IngredientBatchRequest,
     IngredientBatchResponse,
+    IngredientBatchUpdate,
     IngredientRequest,
     IngredientResponse,
     IngredientUpdate,
@@ -26,6 +27,7 @@ __all__ = [
     "IngredientResponse",
     "IngredientBatchRequest",
     "IngredientBatchResponse",
+    "IngredientBatchUpdate",
     "Message",
     "ProductRequest",
     "ProductResponse",

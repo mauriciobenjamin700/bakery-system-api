@@ -99,3 +99,11 @@ def mock_ingredient_batch_request():
         "quantity": 20,
         "validity": "2023-12-31",
     }
+
+
+@fixture
+def mock_ingredient_batch_update():
+    return {
+        "quantity": 30,
+        "validity": "2026-01-31",
+    }

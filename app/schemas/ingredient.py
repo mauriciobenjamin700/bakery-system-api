@@ -126,6 +126,24 @@ class IngredientBatchRequest(IngredientBatchBase):
     pass
 
 
+class IngredientBatchUpdate(BaseSchema):
+    """
+    Essa classe serve para atualizar um registro de "LoteIngredient" no banco de dados
+
+    - Attributes:
+        - validity: date | None
+        - quantity: float | None
+    """
+
+    validity: datetime.date | None = Field(
+        examples=["2023-12-31", "2024-01-01", "2024-02-28"], default=None
+    )
+    quantity: float | None = Field(
+        examples=[10.0, 20.0, 30.0],
+        ge=0,
+    )
+
+
 class IngredientBatchResponse(IngredientBatchBase):
     """
     A schema with data to create a new ingredient on db

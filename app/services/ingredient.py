@@ -223,13 +223,13 @@ class IngredientService:
                 messages.ERROR_DATABASE_INGREDIENT_BATCH_NOT_FOUND,
             )
 
-        for key, value in request.to_dict(exclude=["ingredient_id"]).items():
+        for key, value in request.to_dict().items():
             if value is not None:
                 setattr(batch, key, value)
 
         batch = await self.repository.update_batch(batch)  # type: ignore
 
-        response = await self.repository.map_batch_model_to_response(batch)  # type: ignore
+        response = self.repository.map_batch_model_to_response(batch)  # type: ignore
 
         return response
 
@@ -249,6 +249,4 @@ class IngredientService:
 
         await self.repository.delete_batch(id=batch_id)
 
-        return Message(
-            detail="Batch deleted successfully",
-        )
+        return Message(detail=messages.MESSAGE_INGREDIENT_BATCH_DELETE_SUCCESS)

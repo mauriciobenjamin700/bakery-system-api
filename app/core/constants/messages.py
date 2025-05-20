@@ -69,6 +69,9 @@ ERROR_DATABASE_INGREDIENT_BATCH_NOT_FOUND = (
 MESSAGE_USER_ADD_SUCCESS = "Usuário adicionado com sucesso"
 MESSAGE_USER_DELETE_SUCCESS = "Usuário deletado com sucesso"
 MESSAGE_INGREDIENT_DELETE_SUCCESS = "Ingrediente deletado com sucesso"
+MESSAGE_INGREDIENT_BATCH_DELETE_SUCCESS = (
+    "Lote de ingrediente deletado com sucesso"
+)
 
 ERROR_TOKEN_CLAIMS_INVALID = "Token inválido"
 ERROR_TOKEN_EXPIRED = "Token expirado"
