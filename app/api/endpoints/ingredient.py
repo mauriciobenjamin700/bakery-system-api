@@ -32,7 +32,7 @@ async def add_ingredient(
         - IngredientResponse: The response object containing the added ingredient data.
     """
     service = IngredientService(session)
-    ingredient = await service.add(request)
+    ingredient = await service.add(request, "TODO: IMPLEMENTAR")
     return ingredient
 
 
