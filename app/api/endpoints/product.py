@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends
+from json import loads
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_session
 from app.api.dependencies.permissions import employer_permission
+from app.core.generate.ids import id_generator
 from app.schemas.message import Message
 from app.schemas.product import (
     ProductBatchRequest,
@@ -14,18 +16,53 @@ from app.schemas.product import (
 )
 from app.schemas.user import UserResponse
 from app.services import ProductService
+from app.services.image import ImageService
 
 router = APIRouter(prefix="/product", tags=["product"])
 
 
 @router.post("/", status_code=201)
 async def add_product(
-    request: ProductRequest,
+    image: UploadFile = File(),
+    form_data: str = Form(),
     _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
     # A route to add a product.
+
+    Product data in JSON format should be sent in the form data with this format:
+
+        - name (str): The name of the product.
+        - price_cost (float): The cost price of the product.
+        - price_sale (float): The sale price of the product.
+        - measure (MeasureEnum): The measure of the product.
+        - description (str): The description of the product.
+        - mark (str): The mark of the product.
+        - min_quantity (float): The minimum quantity of the product.
+        - recipe (list[PortionRequest] | None): The recipe of the product.
+        - quantity (float): The quantity of the product.
+        - validity (date | None): The validity date of the product.
+
+    ## Example
+        {
+            "name": "Pão Francês",
+            "price_cost": 2.50,
+            "price_sale": 4.00,
+            "measure": "u",
+            "description": "Pão francês crocante e fresquinho.",
+            "mark": "Padaria Central",
+            "min_quantity": 10,
+            "recipe": [
+                {
+                "ingredient_id": "abc123",
+                "quantity": 0.5,
+                "measure": "KG"
+                }
+            ],
+            "quantity": 100,
+            "validity": "2025-06-01"
+        }
 
     ## Args:
         - request (ProductRequest): The request object containing product data.
@@ -34,8 +71,17 @@ async def add_product(
     ## Returns:
         - ProductResponse: The response object containing the added product data.
     """
+    form_data = loads(form_data)
+
+    request = ProductRequest(**form_data)
+
+    file_path = await ImageService.upload_image(
+        image=image,
+        filename=id_generator()
+    )
+
     service = ProductService(session)
-    response = await service.add(request)
+    response = await service.add(request, file_path)
     return response
 
 

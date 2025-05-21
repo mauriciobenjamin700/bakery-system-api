@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.endpoints.ingredient import router as ingredient_router
 from app.api.endpoints.product import router as product_router
@@ -26,6 +27,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(CustomErrorMiddleware)
+
+app.mount("/images", StaticFiles(directory="app/images"), name="images")
 
 
 @app.exception_handler(RequestValidationError)

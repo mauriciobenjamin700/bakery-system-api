@@ -22,6 +22,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 @router.post("/")
 async def add_user(
     request: UserRequest,
+    _: UserResponse = Depends(admin_permission),
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     """
