@@ -1,7 +1,7 @@
 import pytest
 
-from app.core.errors import NotFoundError
 from app.core.constants import messages
+from app.core.errors import NotFoundError
 from app.schemas import ProductRequest
 from app.services import ProductService
 
@@ -15,7 +15,7 @@ async def test_product_service_get_by_id(
     on_db = await service.add(request, "test.png")
 
     response = await service.get_by_id(on_db.id)
-   
+
     assert on_db == response
 
 

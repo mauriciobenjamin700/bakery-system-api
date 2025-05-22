@@ -52,6 +52,7 @@ class ProductService:
         delete_recipe(portion_id: str) -> Message:
             Delete a recipe from the database.
     """
+
     def __init__(self, session: AsyncSession):
         self.repository = ProductRepository(session)
 
@@ -259,9 +260,7 @@ class ProductService:
             product_batch_id=product_batch_id
         )
 
-        return Message(
-            detail="Produto deletado com sucesso."
-        )
+        return Message(detail="Produto deletado com sucesso.")
 
     async def add_recipe(self, request: RecipeRequest) -> ProductResponse:
         """
@@ -279,9 +278,7 @@ class ProductService:
             product_id=request.product_id
         )
         if not product_model:
-            raise NotFoundError(
-                messages.ERROR_DATABASE_PRODUCT_NOT_FOUND
-            )
+            raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
 
         portion_models = self.repository.map_recipe_request_to_models(request)
 

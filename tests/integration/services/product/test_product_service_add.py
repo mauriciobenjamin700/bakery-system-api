@@ -29,16 +29,16 @@ async def test_product_service_add_success_with_no_recipe(
     assert response.created_at is not None
     assert response.updated_at is not None
 
+
 async def test_product_service_add_success_with_recipe(
-    mock_db_session, 
+    mock_db_session,
     mock_product_request_with_recipe,
-    mock_list_ingredient_request
+    mock_list_ingredient_request,
 ):
     request = ProductRequest(**mock_product_request_with_recipe)
     service = ProductService(mock_db_session)
     ingredients = [
-        IngredientRequest(**data)
-        for data in mock_list_ingredient_request
+        IngredientRequest(**data) for data in mock_list_ingredient_request
     ]
 
     ingredients_on_db = []
@@ -46,7 +46,9 @@ async def test_product_service_add_success_with_recipe(
     ingredient_service = IngredientService(mock_db_session)
 
     for ingredient in ingredients:
-        ingredient_response = await ingredient_service.add(ingredient, "default.png")
+        ingredient_response = await ingredient_service.add(
+            ingredient, "default.png"
+        )
         ingredients_on_db.append(ingredient_response)
 
     for idx in range(len(request.recipe)):

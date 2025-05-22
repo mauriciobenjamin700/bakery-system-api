@@ -11,7 +11,12 @@ from app.core.errors import (
     ServerError,
 )
 from app.core.generate.ids import id_generator
-from app.db.models import IngredientModel, PortionModel, ProductBatchModel, ProductModel
+from app.db.models import (
+    IngredientModel,
+    PortionModel,
+    ProductBatchModel,
+    ProductModel,
+)
 from app.schemas.product import (
     PortionResponse,
     ProductBatchRequest,
@@ -227,7 +232,9 @@ class ProductRepository:
             result = await self.db_session.execute(query)
 
         elif product_id:
-            query = select(PortionModel).where(PortionModel.product_id == product_id)
+            query = select(PortionModel).where(
+                PortionModel.product_id == product_id
+            )
             result = await self.db_session.execute(query)
         else:
             query = select(PortionModel)
@@ -471,22 +478,22 @@ class ProductRepository:
                 batches.append(ProductBatchResponse(**batch.to_dict()))
 
         portions = await self.get_portion(
-            product_id=model.id,
-            all_results=True
+            product_id=model.id, all_results=True
         )
 
         if portions:
             recipe = []
             for portion in portions:
                 portion: PortionModel
-                stmt = (
-                    select(IngredientModel)
-                    .where(IngredientModel.id == portion.ingredient_id)
+                stmt = select(IngredientModel).where(
+                    IngredientModel.id == portion.ingredient_id
                 )
                 result = await self.db_session.execute(stmt)
                 ingredient = result.unique().scalar_one_or_none()
                 if not ingredient:
-                    raise NotFoundError(messages.ERROR_DATABASE_INGREDIENT_NOT_FOUND)
+                    raise NotFoundError(
+                        messages.ERROR_DATABASE_INGREDIENT_NOT_FOUND
+                    )
                 recipe.append(
                     PortionResponse(
                         **portion.to_dict(

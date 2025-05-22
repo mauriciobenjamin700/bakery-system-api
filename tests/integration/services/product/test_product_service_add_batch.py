@@ -1,12 +1,11 @@
-from app.schemas import ProductRequest, ProductResponse, ProductBatchRequest
+from app.schemas import ProductBatchRequest, ProductRequest, ProductResponse
 from app.services import IngredientService, ProductService
 
 
 async def test_product_service_add_batch_success(
-    mock_db_session, 
+    mock_db_session,
     mock_product_request_with_no_recipe,
-    mock_product_batch_request
-
+    mock_product_batch_request,
 ):
     request = ProductRequest(**mock_product_request_with_no_recipe)
     service = ProductService(mock_db_session)

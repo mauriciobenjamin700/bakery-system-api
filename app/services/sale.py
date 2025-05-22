@@ -87,7 +87,7 @@ class SaleService:
 
             model = await self.repository.add(model)
 
-            response = await self.repository.map_model_to_response(model)  # type: ignore
+            response = await self.repository.map_model_to_response(model)
 
         elif type(request) is SaleNoteRequest:
 
@@ -100,16 +100,16 @@ class SaleService:
                 model = await self.repository.add(model)
 
             employee, products, sales = (
-                await self.repository.get_sale_note_data(sale_code=sale_code)  # type: ignore
+                await self.repository.get_sale_note_data(sale_code=sale_code)
             )
 
             response = await self.build_sale_note_response(
                 employee=employee,
-                products=products,  # type: ignore
-                sales=sales,  # type: ignore
+                products=products,
+                sales=sales,
             )
 
-        return response  # type: ignore
+        return response
 
     async def get_sales_by_employee_id(
         self, employee_id: str
@@ -132,7 +132,7 @@ class SaleService:
                 "sales not found",
             )
 
-        return [self.repository.map_model_to_response(sale) for sale in sales]  # type: ignore
+        return [self.repository.map_model_to_response(sale) for sale in sales]
 
     async def get_sales_by_product_id(
         self, product_id: str
@@ -155,7 +155,7 @@ class SaleService:
                 "sales not found",
             )
 
-        return [self.repository.map_model_to_response(sale) for sale in sales]  # type: ignore
+        return [self.repository.map_model_to_response(sale) for sale in sales]
 
     async def get_sales_by_sale_code(
         self, sale_code: str
@@ -175,7 +175,7 @@ class SaleService:
                 "sales not found",
             )
 
-        return [self.repository.map_model_to_response(sale) for sale in sales]  # type: ignore
+        return [self.repository.map_model_to_response(sale) for sale in sales]
 
     async def get_all(self) -> list[SaleResponse]:
         """
@@ -191,7 +191,7 @@ class SaleService:
                 "sales not found",
             )
 
-        return [self.repository.map_model_to_response(sale) for sale in sales]  # type: ignore
+        return [self.repository.map_model_to_response(sale) for sale in sales]
 
     async def get_sale_note_by_sale_code(
         self, sale_code: str
@@ -207,7 +207,7 @@ class SaleService:
         """
 
         employee, products, sales = await self.repository.get_sale_note_data(
-            sale_code=sale_code  # type: ignore
+            sale_code=sale_code
         )
 
         if not employee or not products or not sales:
@@ -217,8 +217,8 @@ class SaleService:
 
         return await self.build_sale_note_response(
             employee=employee,
-            products=products,  # type: ignore
-            sales=sales,  # type: ignore
+            products=products,
+            sales=sales,
         )
 
     async def delete(self, sale_id: str) -> Message:
@@ -259,18 +259,18 @@ class SaleService:
                 "sale note not found",
             )
 
-        for sale in sales:  # type: ignore
+        for sale in sales:
             sale.is_paid = True
             await self.repository.update(model=sale)
 
         employee, products, sales = await self.repository.get_sale_note_data(
-            sale_code=sale_code  # type: ignore
+            sale_code=sale_code
         )
 
         return await self.build_sale_note_response(
             employee=employee,
-            products=products,  # type: ignore
-            sales=sales,  # type: ignore
+            products=products,
+            sales=sales,
         )
 
     async def cancel_sale_note(self, sale_code: str) -> Message:
@@ -293,12 +293,12 @@ class SaleService:
                 "sale note not found",
             )
 
-        for sale in sales:  # type: ignore
+        for sale in sales:
 
             await self.repository.delete(model=sale)
 
         return Message(
-            detail="sale note canceled",  # type: ignore
+            detail="sale note canceled",
         )
 
     async def build_sale_note_response(
@@ -319,7 +319,7 @@ class SaleService:
             SaleNoteResponse: The constructed SaleNoteResponse object.
         """
 
-        seller = UserRepository.map_model_to_response(employee)  # type: ignore
+        seller = UserRepository.map_model_to_response(employee)
         product_responses = [
             await self.product_repository.map_product_model_to_response(
                 product
@@ -327,7 +327,7 @@ class SaleService:
             for product in products
         ]
         notes = [
-            await self.repository.map_model_to_response(sale) for sale in sales  # type: ignore
+            await self.repository.map_model_to_response(sale) for sale in sales
         ]
         total_value = sum([sale.value for sale in sales])
 

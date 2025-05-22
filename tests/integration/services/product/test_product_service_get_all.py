@@ -1,7 +1,7 @@
 import pytest
 
-from app.core.errors import NotFoundError
 from app.core.constants import messages
+from app.core.errors import NotFoundError
 from app.schemas import ProductRequest
 from app.services import ProductService
 
@@ -15,7 +15,7 @@ async def test_product_service_get_all(
     on_db = await service.add(request, "test.png")
 
     response = await service.get_all()
-   
+
     assert isinstance(response, list)
     assert len(response) == 1
     response = response[0]

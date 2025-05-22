@@ -111,6 +111,8 @@ def mock_list_ingredient_request():
             "quantity": 30,
         },
     ]
+
+
 @fixture
 def mock_ingredient_update():
     return {
@@ -154,6 +156,7 @@ def mock_product_request_with_no_recipe():
         "validity": "2026-12-31",
     }
 
+
 @fixture
 def mock_product_request_with_recipe():
     return {
@@ -177,6 +180,7 @@ def mock_product_request_with_recipe():
             },
         ],
     }
+
 
 @fixture
 def mock_product_batch_request():
