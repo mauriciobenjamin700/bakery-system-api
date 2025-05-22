@@ -29,7 +29,5 @@ class BaseSchema(BaseModel):
                 result[key] = value
 
         result.update(include)
-
-        print("RESULT:", result)
-
+        
         return result

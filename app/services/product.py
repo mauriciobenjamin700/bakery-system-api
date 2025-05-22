@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants import messages
 from app.core.errors import NotFoundError
 from app.db.repositories import ProductRepository
 from app.schemas.message import Message
@@ -51,7 +52,6 @@ class ProductService:
         delete_recipe(portion_id: str) -> Message:
             Delete a recipe from the database.
     """
-
     def __init__(self, session: AsyncSession):
         self.repository = ProductRepository(session)
 
@@ -71,14 +71,12 @@ class ProductService:
         product_model, portion_models, batch_model = (
             self.repository.map_product_request_to_model(request, image_path)
         )
-
         product_model = await self.repository.add(product_model)
 
         await self.repository.add_product_batch(batch_model)
 
         if portion_models:
-            for portion_model in portion_models:
-                await self.repository.add_portion(portion_model)
+            await self.repository.add_portion(portion_models)
 
         response = await self.repository.map_product_model_to_response(
             product_model
@@ -101,7 +99,7 @@ class ProductService:
 
         if not product_model:
 
-            raise NotFoundError(f"Product with ID {product_id} not found.")
+            raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
 
         response = await self.repository.map_product_model_to_response(
             product_model  # type: ignore
@@ -120,11 +118,11 @@ class ProductService:
         product_models = await self.repository.get()
 
         if not product_models:
-            raise NotFoundError("No products found.")
+            raise NotFoundError(messages.ERROR_DATABASE_PRODUCTS_NOT_FOUND)
 
         response = []
 
-        for model in product_models:  # type: ignore
+        for model in product_models:
             result = await self.repository.map_product_model_to_response(model)
             response.append(result)
 
@@ -147,7 +145,7 @@ class ProductService:
         product_model = await self.repository.get(product_id=product_id)
 
         if not product_model:
-            raise NotFoundError(f"Product with ID {product_id} not found.")
+            raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
 
         for key, value in request.to_dict().items():
             if value is not None:
@@ -202,7 +200,7 @@ class ProductService:
         )
 
         response = await self.repository.map_product_model_to_response(
-            product_model  # type: ignore
+            product_model
         )
 
         return response
@@ -227,7 +225,7 @@ class ProductService:
 
         if not batch_model:
             raise NotFoundError(
-                f"Product batch with ID {product_batch_id} not found."
+                messages.ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND
             )
 
         for key, value in request.to_dict().items():
@@ -262,7 +260,7 @@ class ProductService:
         )
 
         return Message(
-            detail=f"Product batch with ID {product_batch_id} deleted successfully."
+            detail="Produto deletado com sucesso."
         )
 
     async def add_recipe(self, request: RecipeRequest) -> ProductResponse:
@@ -282,7 +280,7 @@ class ProductService:
         )
         if not product_model:
             raise NotFoundError(
-                f"Product with ID {request.product_id} not found."
+                messages.ERROR_DATABASE_PRODUCT_NOT_FOUND
             )
 
         portion_models = self.repository.map_recipe_request_to_models(request)

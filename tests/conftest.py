@@ -81,6 +81,37 @@ def mock_ingredient_request():
 
 
 @fixture
+def mock_list_ingredient_request():
+    return [
+        {
+            "name": "Tomato",
+            "measure": MeasureEnum.KG.value,
+            "mark": "Fresh",
+            "description": "Fresh and ripe tomatoes",
+            "value": 3.5,
+            "min_quantity": 10,
+            "quantity": 20,
+        },
+        {
+            "name": "Potato",
+            "measure": MeasureEnum.KG.value,
+            "mark": "Fresh",
+            "description": "Fresh and ripe potatoes",
+            "value": 2.0,
+            "min_quantity": 15,
+            "quantity": 30,
+        },
+        {
+            "name": "Rice",
+            "measure": MeasureEnum.KG.value,
+            "mark": "Fresh",
+            "description": "Fresh and ripe potatoes",
+            "value": 2.0,
+            "min_quantity": 5,
+            "quantity": 30,
+        },
+    ]
+@fixture
 def mock_ingredient_update():
     return {
         "name": "Tomate",
@@ -121,4 +152,36 @@ def mock_product_request_with_no_recipe():
         "min_quantity": 10,
         "quantity": 20,
         "validity": "2026-12-31",
+    }
+
+@fixture
+def mock_product_request_with_recipe():
+    return {
+        "name": "Bolo de Tomate",
+        "price_cost": 10,
+        "price_sale": 20,
+        "measure": MeasureEnum.KG.value,
+        "description": "This is a test product",
+        "mark": "Test Mark",
+        "min_quantity": 10,
+        "quantity": 20,
+        "validity": "2026-12-31",
+        "recipe": [
+            {
+                "ingredient_id": "1",
+                "quantity": 2,
+            },
+            {
+                "ingredient_id": "2",
+                "quantity": 3,
+            },
+        ],
+    }
+
+@fixture
+def mock_product_batch_request():
+    return {
+        "product_id": "1",
+        "quantity": 20,
+        "validity": "2023-12-31",
     }
