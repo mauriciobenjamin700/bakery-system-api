@@ -1,4 +1,5 @@
 from json import loads
+
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -76,8 +77,7 @@ async def add_product(
     request = ProductRequest(**form_data)
 
     file_path = await ImageService.upload_image(
-        image=image,
-        filename=id_generator()
+        image=image, filename=id_generator()
     )
 
     service = ProductService(session)

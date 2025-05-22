@@ -1,11 +1,10 @@
 from os import makedirs
 from os.path import exists, join
-from typing import Literal
 
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 
-from app.core.errors import NotFoundError, ValidationError
+from app.core.errors import NotFoundError
 
 
 class ImageService:
@@ -27,11 +26,7 @@ class ImageService:
     IMAGES_DIR = "app/images"
 
     @classmethod
-    async def upload_image(
-        cls,
-        image: UploadFile,
-        filename: str
-    ) -> str:
+    async def upload_image(cls, image: UploadFile, filename: str) -> str:
         """
         Upload an image to the specified directory and return the file path.
 
@@ -48,10 +43,9 @@ class ImageService:
 
         filename = filename + ".jpg"
 
-
         if not exists(cls.IMAGES_DIR):
             makedirs(cls.IMAGES_DIR, exist_ok=True)
-        
+
         file_path = join(cls.IMAGES_DIR, filename)
 
         content = await image.read()

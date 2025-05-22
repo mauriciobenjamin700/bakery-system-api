@@ -13,5 +13,4 @@ async def test_product_service_add_success(
     assert isinstance(response, ProductResponse)
     assert response.name == request.name
     assert response.description == request.description
-    assert response.price == request.price
-    assert response.image_url == "test.png"
+    assert response.image_path == "test.png"

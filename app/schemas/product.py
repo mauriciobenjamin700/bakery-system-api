@@ -243,6 +243,7 @@ class ProductResponse(ProductBase):
         mark (str): The mark of the product.
         min_quantity (float): The minimum quantity of the product.
         id (str): The ID of the product.
+        image_path (str): The path to the product image.
         quantity (float): The quantity of the product.
         recipe (list[PortionResponse] | None): The recipe of the product.
         batches (list[ProductBatchResponse] | None): The batches of the product.
@@ -251,8 +252,12 @@ class ProductResponse(ProductBase):
     """
 
     id: str
+    image_path: str
     quantity: float
     recipe: list[PortionResponse] | None = None
     batches: list[ProductBatchResponse] | None = None
     created_at: str = Field("examples=2025-10-02 12:00:00")
     updated_at: str = Field("examples=2025-10-02 12:00:00")
+
+    _parse_created_at = validators.validate_created_at
+    _parse_updated_at = validators.validate_updated_at

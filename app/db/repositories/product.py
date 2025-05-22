@@ -3,7 +3,13 @@ from typing import Sequence
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import BadRequestError, NotFoundError
+from app.core.constants import messages
+from app.core.errors import (
+    BadRequestError,
+    ConflictError,
+    NotFoundError,
+    ServerError,
+)
 from app.core.generate.ids import id_generator
 from app.db.models import PortionModel, ProductBatchModel, ProductModel
 from app.schemas.product import (
@@ -71,10 +77,37 @@ class ProductRepository:
         Returns:
             ProductModel: The added product model.
         """
-        self.db_session.add(model)
-        await self.db_session.commit()
-        await self.db_session.refresh(model)
-        return model
+        try:
+
+            stmt = select(ProductModel).where(
+                ProductModel.name == model.name,
+                ProductModel.price_cost == model.price_cost,
+                ProductModel.price_sale == model.price_sale,
+                ProductModel.measure == model.measure,
+                ProductModel.image_path == model.image_path,
+                ProductModel.description == model.description,
+                ProductModel.mark == model.mark,
+                ProductModel.min_quantity == model.min_quantity,
+            )
+
+            result = await self.db_session.execute(stmt)
+
+            existing_product = result.unique().scalar_one_or_none()
+            if existing_product:
+                raise ConflictError(
+                    messages.ERROR_DATABASE_PRODUCT_ALREADY_EXISTS
+                )
+
+            self.db_session.add(model)
+            await self.db_session.commit()
+            await self.db_session.refresh(model)
+            return model
+
+        except ConflictError as e:
+            raise e
+
+        except Exception as e:
+            raise ServerError(e)
 
     async def get(
         self, product_id: str | None = None
@@ -101,6 +134,9 @@ class ProductRepository:
             query = select(ProductModel)
             result = await self.db_session.execute(query)
             response = result.unique().scalars().all()
+
+            if not response:
+                response = None
 
         return response
 
@@ -139,7 +175,7 @@ class ProductRepository:
             query = delete(ProductModel).where(ProductModel.id == product_id)
             result = await self.db_session.execute(query)
             if result.rowcount == 0:
-                raise NotFoundError("Product not found")
+                raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
         else:
             raise BadRequestError(
                 "Either model or product_id must be provided"
@@ -242,7 +278,7 @@ class ProductRepository:
             query = delete(PortionModel).where(PortionModel.id == portion_id)
             result = await self.db_session.execute(query)
             if result.rowcount == 0:
-                raise NotFoundError("Portion not found")
+                raise NotFoundError(messages.ERROR_PORTION_NOT_FOUND)
         else:
             raise BadRequestError(
                 "Either model or portion_id must be provided"
@@ -346,7 +382,9 @@ class ProductRepository:
             )
             result = await self.db_session.execute(query)
             if result.rowcount == 0:
-                raise NotFoundError("Product batch not found")
+                raise NotFoundError(
+                    messages.ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND
+                )
         else:
             raise BadRequestError(
                 "Either model or product_batch_id must be provided"
@@ -369,11 +407,8 @@ class ProductRepository:
         """
         product = ProductModel(
             **request.to_dict(
-                exclude=["recipe", "quantity"],
-                include={
-                    "id": id_generator(),
-                    "image_path": image_path,
-                },
+                exclude=["recipe", "quantity", "validity"],
+                include={"id": id_generator(), "image_path": image_path},
             )
         )
 

@@ -65,6 +65,13 @@ ERROR_DATABASE_INGREDIENTS_NOT_FOUND = "Ingredientes não encontrados"
 ERROR_DATABASE_INGREDIENT_BATCH_NOT_FOUND = (
     "Lote de ingrediente não encontrado"
 )
+ERROR_DATABASE_PRODUCT_ALREADY_EXISTS = "Produto já cadastrado"
+ERROR_DATABASE_PRODUCT_NOT_FOUND = "Produto não encontrado"
+ERROR_DATABASE_PRODUCTS_NOT_FOUND = "Produtos não encontrados"
+ERROR_PORTION_NOT_FOUND = "Porção não encontrada"
+ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND = "Lote de produto não encontrado"
+
+SERVER_ERROR = "Erro interno do servidor"
 
 MESSAGE_USER_ADD_SUCCESS = "Usuário adicionado com sucesso"
 MESSAGE_USER_DELETE_SUCCESS = "Usuário deletado com sucesso"
