@@ -87,7 +87,7 @@ class SaleService:
 
             model = await self.repository.add(model)
 
-            response = await self.repository.map_model_to_response(model)
+            response = self.repository.map_model_to_response(model)
 
         elif type(request) is SaleNoteRequest:
 

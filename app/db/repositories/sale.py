@@ -3,6 +3,7 @@ from typing import Sequence
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants import messages
 from app.core.errors import BadRequestError, NotFoundError
 from app.db.models import ProductBatchModel, ProductModel, SaleModel, UserModel
 from app.schemas import SaleRequest, SaleResponse
@@ -48,16 +49,6 @@ class SaleRepository:
         Returns:
             SaleModel: The added model object.
         """
-
-        query = select(ProductModel).where(ProductModel.id == model.product_id)
-
-        result = await self.db_session.execute(query)
-
-        product = result.unique().scalars().first()
-
-        if not product:
-            raise NotFoundError("Product not found")
-
         query = (
             select(ProductBatchModel)
             .where(ProductBatchModel.product_id == model.product_id)
@@ -69,12 +60,14 @@ class SaleRepository:
         batches = result.unique().scalars().all()
 
         if not batches:
-            raise NotFoundError("Product batch not found")
+            raise NotFoundError(
+                messages.ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND
+            )
 
         quantity = sum([batch.quantity for batch in batches])
 
         if quantity < model.quantity:
-            raise NotFoundError("Not enough product in stock")
+            raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_ENOUGH_STOCK)
 
         query = select(UserModel).where(UserModel.id == model.user_id)
 
@@ -84,7 +77,7 @@ class SaleRepository:
 
         if not user:
 
-            raise NotFoundError("User not found")
+            raise NotFoundError(messages.ERROR_DATABASE_USER_NOT_FOUND)
 
         products_sold = model.quantity
 
@@ -258,10 +251,12 @@ class SaleRepository:
 
         result = await self.db_session.execute(query)
 
-        product = result.unique().scalars().first()
+        product = result.unique().scalar_one_or_none()
+
+        print(product.id)
 
         if not product:
-            raise NotFoundError("Product not found")
+            raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
 
         value = product.price_sale * request.quantity
 

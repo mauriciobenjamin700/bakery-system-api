@@ -79,6 +79,7 @@ MESSAGE_INGREDIENT_DELETE_SUCCESS = "Ingrediente deletado com sucesso"
 MESSAGE_INGREDIENT_BATCH_DELETE_SUCCESS = (
     "Lote de ingrediente deletado com sucesso"
 )
+ERROR_DATABASE_PRODUCT_ENOUGH_STOCK = "Produto sem estoque"
 
 ERROR_TOKEN_CLAIMS_INVALID = "Token inválido"
 ERROR_TOKEN_EXPIRED = "Token expirado"

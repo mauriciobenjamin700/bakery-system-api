@@ -189,3 +189,12 @@ def mock_product_batch_request():
         "quantity": 20,
         "validity": "2023-12-31",
     }
+
+
+@fixture
+def mock_sale_request():
+    return {
+        "product_id": "1",
+        "user_id": "1",
+        "quantity": 1,
+    }
