@@ -7,6 +7,8 @@ from app.core.constants.enums.user import UserRoles
 from app.core.security.password import hash_password
 from app.core.settings import config
 from app.db.configs.connection import AsyncDatabaseManager
+from app.db.models import UserModel
+from app.utils.validators.strings import parse_phone
 
 
 @fixture
@@ -189,3 +191,21 @@ def mock_product_batch_request():
         "quantity": 20,
         "validity": "2023-12-31",
     }
+
+
+@fixture
+async def mock_user_on_db(mock_db_session) -> UserModel:
+
+    user = UserModel(
+        name="On db User",
+        phone=parse_phone("(89) 91111-2222"),
+        email="db_user@gmail.com",
+        password=hash_password("SafePassword123@"),
+        role=UserRoles.USER.value,
+    )
+
+    mock_db_session.add(user)
+
+    await mock_db_session.commit()
+
+    return user

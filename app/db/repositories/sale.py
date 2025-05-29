@@ -3,6 +3,7 @@ from typing import Sequence
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants import messages
 from app.core.errors import BadRequestError, NotFoundError
 from app.db.models import ProductBatchModel, ProductModel, SaleModel, UserModel
 from app.schemas import SaleRequest, SaleResponse
@@ -38,7 +39,7 @@ class SaleRepository:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def add(self, model: SaleModel) -> SaleModel:
+    async def add(self, model: SaleModel | list[SaleModel]) -> SaleModel:
         """
         Async method to add a SaleModel to the database.
 
@@ -49,56 +50,80 @@ class SaleRepository:
             SaleModel: The added model object.
         """
 
-        query = select(ProductModel).where(ProductModel.id == model.product_id)
+        async def local_add(model: SaleModel) -> None:
+            """
+            Local function to add a SaleModel to the database.
 
-        result = await self.db_session.execute(query)
+            Args:
+                model (SaleModel): The model object to add.
+            Returns:
+                SaleModel: The added model object.
+            """
 
-        product = result.unique().scalars().first()
+            query = select(ProductModel).where(
+                ProductModel.id == model.product_id
+            )
 
-        if not product:
-            raise NotFoundError("Product not found")
+            result = await self.db_session.execute(query)
 
-        query = (
-            select(ProductBatchModel)
-            .where(ProductBatchModel.product_id == model.product_id)
-            .order_by(ProductBatchModel.validity.asc())
-        )
+            product = result.unique().scalars().first()
 
-        result = await self.db_session.execute(query)
+            if not product:
+                raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
 
-        batches = result.unique().scalars().all()
+            query = select(UserModel).where(UserModel.id == model.user_id)
 
-        if not batches:
-            raise NotFoundError("Product batch not found")
+            result = await self.db_session.execute(query)
 
-        quantity = sum([batch.quantity for batch in batches])
+            user = result.unique().scalar_one_or_none()
 
-        if quantity < model.quantity:
-            raise NotFoundError("Not enough product in stock")
+            if not user:
+                raise NotFoundError(messages.ERROR_DATABASE_USER_NOT_FOUND)
 
-        query = select(UserModel).where(UserModel.id == model.user_id)
+            query = (
+                select(ProductBatchModel)
+                .where(ProductBatchModel.product_id == model.product_id)
+                .order_by(ProductBatchModel.validity.asc())
+            )
 
-        result = await self.db_session.execute(query)
+            result = await self.db_session.execute(query)
 
-        user = result.unique().scalar_one_or_none()
+            batches = result.unique().scalars().all()
 
-        if not user:
+            if not batches:
+                raise NotFoundError(
+                    messages.ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND
+                )
 
-            raise NotFoundError("User not found")
+            quantity = sum([batch.quantity for batch in batches])
 
-        products_sold = model.quantity
+            if quantity < model.quantity:
+                raise NotFoundError(messages.ERROR_NOT_ENOUGH_PRODUCT_IN_STOCK)
 
-        for batch in batches:
-            if batch.quantity >= products_sold:
-                batch.quantity -= products_sold
-                break
-            else:
-                products_sold -= batch.quantity
-                await self.db_session.delete(batch)
+            products_sold = model.quantity
 
-        self.db_session.add(model)
+            for batch in batches:
+                if batch.quantity > products_sold:
+                    batch.quantity -= products_sold
+                    break
+                else:
+                    products_sold -= batch.quantity
+                    await self.db_session.delete(batch)
+
+            self.db_session.add(model)
+
+        if type(model) is list:
+
+            for item in model:
+                await local_add(item)
+
+            model = model[0]  # Return the first model for consistency
+        else:
+            print("Adding model:", model)
+            await local_add(model)
 
         await self.db_session.commit()
+
         await self.db_session.refresh(model)
 
         return model
@@ -261,7 +286,7 @@ class SaleRepository:
         product = result.unique().scalars().first()
 
         if not product:
-            raise NotFoundError("Product not found")
+            raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
 
         value = product.price_sale * request.quantity
 

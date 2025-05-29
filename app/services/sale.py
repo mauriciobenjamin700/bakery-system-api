@@ -87,17 +87,16 @@ class SaleService:
 
             model = await self.repository.add(model)
 
-            response = await self.repository.map_model_to_response(model)
+            response = self.repository.map_model_to_response(model)
 
         elif type(request) is SaleNoteRequest:
 
-            for sale in request.sales:
+            models = [
+                await self.repository.map_request_to_model(sale, sale_code)
+                for sale in request.sales
+            ]
 
-                model = await self.repository.map_request_to_model(
-                    sale, sale_code
-                )
-
-                model = await self.repository.add(model)
+            model = await self.repository.add(models)
 
             employee, products, sales = (
                 await self.repository.get_sale_note_data(sale_code=sale_code)
@@ -326,9 +325,7 @@ class SaleService:
             )
             for product in products
         ]
-        notes = [
-            await self.repository.map_model_to_response(sale) for sale in sales
-        ]
+        notes = [self.repository.map_model_to_response(sale) for sale in sales]
         total_value = sum([sale.value for sale in sales])
 
         return SaleNoteResponse(

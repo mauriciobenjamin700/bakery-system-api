@@ -1,6 +1,7 @@
 from pydantic import Field
 
 from app.schemas.product import ProductResponse
+from app.schemas.settings import validators
 from app.schemas.settings.base import BaseSchema
 from app.schemas.user import UserResponse
 
@@ -41,12 +42,18 @@ class SaleResponse(SaleBase):
         product_id (str): The ID of the product.
         user_id (str): The ID of the user.
         quantity (float): The quantity of the product sold.
+        id (str): The ID of the sale.
+        is_paid (bool): Indicates if the sale is paid.
+        value (float): The total value of the sale.
+        created_at (str): The timestamp when the sale was created.
     """
 
     id: str = Field(examples=["1234567890"])
     is_paid: bool = Field(examples=[True])
     value: float = Field(examples=[10.0])
     created_at: str = Field(examples=["2023-10-01T12:00:00Z"])
+
+    _validate_created_at = validators.validate_created_at
 
 
 class SaleNoteRequest(BaseSchema):
