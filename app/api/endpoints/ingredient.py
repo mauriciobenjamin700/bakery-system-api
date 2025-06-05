@@ -35,6 +35,19 @@ async def add_ingredient(
     ingredient = await service.add(request, "TODO: IMPLEMENTAR")
     return ingredient
 
+@router.post("/s", status_code=201, include_in_schema=False) # Adicione "s" para plural, e inclua no final
+async def add_ingredient_test_s(
+    request: IngredientRequest,
+    _: UserResponse = Depends(employer_permission),
+    session: AsyncSession = Depends(get_session),
+) -> IngredientResponse:
+    """
+    Rota de teste para /ingredients (plural) se o prefixo principal não funcionar.
+    """
+    print("!!!!!!!!!!!!!!!!!!!!!! ROTA DE TESTE /ingredients ACESSADA !!!!!!!!!!!!!!!!!!!!!")
+    service = IngredientService(session)
+    ingredient = await service.add(request, "TODO: IMPLEMENTAR (TESTE)")
+    return ingredient
 
 @router.get("/", response_model=list[IngredientResponse])
 async def get_ingredients(

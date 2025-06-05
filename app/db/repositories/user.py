@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, func # Importar func para funções SQL como lower
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.constants.enums.user import UserRoles
@@ -43,6 +43,9 @@ class UserRepository:
         """
 
         try:
+            # Antes de adicionar, garantir que o email é armazenado em minúsculas e sem espaços
+            model.email = model.email.strip().lower()
+
             self.db_session.add(model)
             await self.db_session.commit()
             await self.db_session.refresh(model)
@@ -51,6 +54,8 @@ class UserRepository:
         except Exception as e:
             print("USER REPOSITORY ADD ERROR: ", e)
             await self.db_session.rollback()
+            # Se a base de dados tiver uma restrição de unicidade no email,
+            # um erro de conflito será levantado aqui.
             raise ConflictError(ERROR_DATABASE_USER_ALREADY_EXISTS)
 
     async def get(
@@ -74,7 +79,11 @@ class UserRepository:
         if id:
             stmt = select(UserModel).where(UserModel.id == id)
         elif email:
-            stmt = select(UserModel).where(UserModel.email == email)
+            # MODIFICAÇÃO CHAVE: Usar lower() e strip() no email de entrada
+            # e comparar com a versão em minúsculas do email na base de dados (func.lower)
+            # para garantir uma pesquisa insensível a maiúsculas/minúsculas e sem espaços.
+            search_email = email.strip().lower()
+            stmt = select(UserModel).where(func.lower(UserModel.email) == search_email)
         else:
             stmt = select(UserModel)
 
@@ -95,6 +104,9 @@ class UserRepository:
         - Returns:
             - UserModel
         """
+        # Antes de atualizar, garantir que o email é armazenado em minúsculas e sem espaços
+        model.email = model.email.strip().lower()
+
         await self.db_session.commit()
         await self.db_session.refresh(model)
         return model

@@ -19,9 +19,9 @@ class AsyncDatabaseManager:
     It also provides methods to create and drop tables in the database.
     Attributes:
         db_url (str): The database URL.
-        _engine (AsyncEngine): The SQLAlchemy async engine.
-        _session_maker (async_sessionmaker): The SQLAlchemy async session maker.
-        _active_session (AsyncSession): The active database session.
+        _engine (Optional[AsyncEngine]): The SQLAlchemy async engine.
+        _session_maker (Optional[async_sessionmaker]): The SQLAlchemy async session maker.
+        _active_session (Optional[AsyncSession]): The active database session.
     Methods:
         connect(): Connect to the database.
         disconnect(): Disconnect from the database.
@@ -46,8 +46,23 @@ class AsyncDatabaseManager:
                     connect_args={"check_same_thread": False},
                 )
             else:
+                # MODIFICAÇÃO CHAVE: Construir a URL da base de dados a partir de componentes
+                # Isso garante que o nome da base de dados 'db' seja usado corretamente.
+                db_url_constructed = (
+                    f"postgresql+asyncpg://"
+                    f"{config.DB_USER}:{config.DB_PASSWORD}@"
+                    f"{config.DB_HOST}:{config.DB_PORT}/"
+                    f"{config.DB_NAME}"
+                )
+                print(f"DEBUG: A ligar à base de dados com URL: {db_url_constructed}") # Para debug nos logs
+
                 self._engine = create_async_engine(
-                    self.db_url, echo=False, pool_size=10, max_overflow=5
+                    db_url_constructed, # Usar a URL construída
+                    echo=False,
+                    pool_size=10,
+                    max_overflow=5,
+                    # O connect_args={"database": config.DB_NAME} é removido aqui,
+                    # pois o nome da base de dados já está explicitamente na URL.
                 )
 
             self._session_maker = async_sessionmaker(
