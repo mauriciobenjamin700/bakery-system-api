@@ -19,9 +19,15 @@ app = FastAPI(
     root_path="/api",
 )
 
+origins = [
+    "http://localhost:3000",
+    "http://localhost",
+    "http://bakery-system-web"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["*"],
