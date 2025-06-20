@@ -112,12 +112,24 @@ async def get_products(
 @router.put("/{product_id}")
 async def update_product(
     product_id: str,
-    request: ProductUpdate,
+    image: UploadFile | None = None,
+    form_data: str = Form(),
     _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> ProductResponse:
     """
     # A route to update a product.
+
+    Product data in JSON format should be sent in the form data with this format:
+    
+        - name: str | None = None,
+        - price_cost: float | None = None,
+        - price_sale: float | None = None,
+        - measure: MeasureEnum | None = None,
+        - description: str | None = None,
+        - mark: str | None = None,
+        - min_quantity: float | None = None,
+
 
     ## Args:
         - product_id (str): The ID of the product to update.
@@ -127,8 +139,26 @@ async def update_product(
     ## Returns:
         - ProductResponse: The response object containing the updated product data.
     """
+
+    form_data = loads(form_data)
+
+    request = ProductUpdate(**form_data)
+
+    if image:
+
+        file_path = await ImageService.upload_image(
+            image=image, filename=id_generator()
+        )
+
+        request.image_path = file_path
+
+    else:
+        request.image_path = None
+
     service = ProductService(session)
+
     response = await service.update(product_id, request)
+
     return response
 
 

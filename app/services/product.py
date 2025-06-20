@@ -152,7 +152,7 @@ class ProductService:
             if value is not None:
                 setattr(product_model, key, value)
 
-        product_model = await self.repository.update(product_model)  # type: ignore
+        product_model = await self.repository.update(product_model)
 
         response = await self.repository.map_product_model_to_response(
             product_model

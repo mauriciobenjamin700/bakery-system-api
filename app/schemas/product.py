@@ -130,6 +130,7 @@ class ProductUpdate(BaseSchema):
         description (str | None): The description of the product.
         mark (str | None): The mark of the product.
         min_quantity (float | None): The minimum quantity of the product.
+        image_path (str | None): The path to the product image.
     """
 
     name: str | None = None
@@ -139,6 +140,7 @@ class ProductUpdate(BaseSchema):
     description: str | None = None
     mark: str | None = None
     min_quantity: float | None = None
+    image_path: str | None = None
 
 
 class RecipeRequest(BaseSchema):
