@@ -113,11 +113,6 @@ class IngredientService:
 
         ingredients = await self.repository.get(all_results=True)
 
-        if not ingredients:
-            raise NotFoundError(
-                messages.ERROR_DATABASE_INGREDIENTS_NOT_FOUND,
-            )
-
         response = [
             await self.repository.map_model_to_response(ingredient)
             for ingredient in ingredients  # type: ignore

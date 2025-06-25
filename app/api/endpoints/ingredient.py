@@ -10,6 +10,7 @@ from app.schemas.ingredient import (
     IngredientBatchRequest,
     IngredientRequest,
     IngredientResponse,
+    IngredientUpdate,
 )
 from app.schemas.message import Message
 from app.schemas.user import UserResponse
@@ -104,7 +105,8 @@ async def get_ingredients(
 @router.put("/{ingredient_id}", status_code=200)
 async def update_ingredient(
     ingredient_id: str,
-    request: IngredientRequest,
+    image: UploadFile = File(None),  # imagem opcional
+    form_data: str = Form(...),      # dados obrigatórios
     _: UserResponse = Depends(employer_permission),
     session: AsyncSession = Depends(get_session),
 ) -> IngredientResponse:
@@ -119,6 +121,18 @@ async def update_ingredient(
     ## Returns:
         - IngredientResponse: The response object containing the updated ingredient data.
     """
+
+    form_data = loads(form_data)    
+    request = IngredientUpdate(**form_data)
+
+    if image:
+        file_path = await ImageService.upload_image(
+            image=image, filename=id_generator()
+        )
+        request.image_path = file_path
+    else:
+        request.image_path = None
+
     service = IngredientService(session)
     ingredient = await service.update(ingredient_id, request)
     return ingredient

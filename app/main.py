@@ -39,7 +39,7 @@ app.mount("/images", StaticFiles(directory="app/images"), name="images")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
+    _: Request, exc: RequestValidationError
 ):
     """
     Exception handler for RequestValidationError.
@@ -52,7 +52,8 @@ async def validation_exception_handler(
     """
     pydantic_errors = exc.errors()
     msg = pydantic_errors[0]["msg"]
-    loc, field = pydantic_errors[0]["loc"]
+    loc = pydantic_errors[0]["loc"]
+    field = loc[-1] if isinstance(loc, (list, tuple)) and len(loc) > 0 else loc
     detail = f"{msg} {field} in {loc}"
 
     return JSONResponse(status_code=422, content={"detail": detail})

@@ -89,7 +89,14 @@ class IngredientUpdate(IngredientBase):
         validity (date | None): The validity of the ingredient
     """
 
-    pass
+    name: str | None = None
+    measure: MeasureEnum | None = None
+    mark: str | None = None
+    description: str | None = None
+    value: float | None = None
+    min_quantity: float | None = None
+    validity: datetime.date | None = None
+    image_path: str | None = None
 
 
 class IngredientBatchBase(BaseSchema):
