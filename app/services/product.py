@@ -209,17 +209,6 @@ class ProductService:
     async def update_product_batch(
         self, product_batch_id: str, request: ProductBatchUpdate
     ) -> ProductResponse:
-        """
-        Update a batch of products in the database.
-
-        Args:
-            product_batch_id (str): The ID of the product batch to update.
-            request (ProductBatchUpdate): The product batch request object containing updated product details.
-
-        Returns:
-            ProductResponse: The response object containing the updated product details.
-        """
-
         batch_model = await self.repository.get_product_batch(
             product_batch_id=product_batch_id
         )
@@ -229,20 +218,30 @@ class ProductService:
                 messages.ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND
             )
 
+        # DEBUG PRINTS ADICIONADOS AQUI
+        print(f"DEBUG SERVICE: Tentando atualizar lote {product_batch_id}. Qtd Antiga: {batch_model.quantity}. Qtd Nova Solicitada: {request.quantity}. Validade: {request.validity}") # <-- ADICIONAR
+        
         for key, value in request.to_dict().items():
             if value is not None:
                 setattr(batch_model, key, value)
+        
+        # DEBUG PRINTS ADICIONADOS AQUI
+        print(f"DEBUG SERVICE: Lote em memória após setattr. Qtd: {batch_model.quantity}. Validade: {batch_model.validity}") # <-- ADICIONAR
 
         batch_model = await self.repository.update_product_batch(batch_model)  # type: ignore
+
+        # DEBUG PRINTS ADICIONADOS AQUI
+        print(f"DEBUG SERVICE: Lote persistido no DB. Qtd Retornada do REPO: {batch_model.quantity}") # <-- ADICIONAR
 
         product_model = await self.repository.get(
             product_id=batch_model.product_id
         )
 
         response = await self.repository.map_product_model_to_response(
-            product_model  # type: ignore
+            product_model
         )
-
+        # DEBUG PRINTS ADICIONADOS AQUI
+        print(f"DEBUG SERVICE: Resposta final do produto (total). Qtd Total: {response.quantity}") # <-- ADICIONAR
         return response
 
     async def delete_product_batch(self, product_batch_id: str) -> Message:

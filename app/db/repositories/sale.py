@@ -12,28 +12,6 @@ from app.schemas import SaleRequest, SaleResponse
 class SaleRepository:
     """
     Repository class for handling Sale operations.
-
-    Methods:
-        add(model: SaleModel) -> SaleModel:
-            Adds a SaleModel to the database.
-
-        get(id: str | None = None, user_id: str | None = None, product_id: str | None = None, all_results: bool = False) -> SaleModel | list[SaleModel] | None:
-            Retrieves SaleModel(s) from the database.
-
-        update(model: SaleModel) -> SaleModel:
-            Updates a SaleModel in the database.
-
-        delete(id: str | None = None, model: SaleModel | None = None) -> bool:
-            Deletes a SaleModel from the database.
-
-        get_sale_note_data(sale_code: str) -> tuple[UserModel, list[ProductModel], list[SaleModel]] | None:
-            Retrieves sale note data for a given sale code.
-
-        map_request_to_model(request: SaleRequest, sale_code: str) -> SaleModel:
-            Maps a SaleRequest to a SaleModel.
-
-        map_model_to_response(model: SaleModel) -> SaleResponse:
-            Maps a SaleModel to a SaleResponse.
     """
 
     def __init__(self, db_session: AsyncSession):
@@ -42,22 +20,11 @@ class SaleRepository:
     async def add(self, model: SaleModel | list[SaleModel]) -> SaleModel:
         """
         Async method to add a SaleModel to the database.
-
-        Args:
-            model (SaleModel): The model object to add.
-
-        Returns:
-            SaleModel: The added model object.
         """
 
         async def local_add(model: SaleModel) -> None:
             """
             Local function to add a SaleModel to the database.
-
-            Args:
-                model (SaleModel): The model object to add.
-            Returns:
-                SaleModel: The added model object.
             """
 
             query = select(ProductModel).where(
@@ -102,32 +69,40 @@ class SaleRepository:
 
             products_sold = model.quantity
 
+            # AQUI ESTÁ A CORREÇÃO PRINCIPAL: NÃO DELETAR, APENAS ATUALIZAR
             for batch in batches:
+                if products_sold <= 0: # Se já vendemos o suficiente, para de processar lotes
+                    break
+
                 if batch.quantity > products_sold:
                     batch.quantity -= products_sold
-                    break
+                    # Não precisamos de self.db_session.add(batch) aqui, pois o batch
+                    # já está "attached" à sessão se veio de uma query.
+                    # As alterações serão detectadas no commit.
+                    products_sold = 0 # Zerar o que precisa vender
                 else:
                     products_sold -= batch.quantity
-                    await self.db_session.delete(batch)
+                    batch.quantity = 0 # <-- CORRIGIDO: Define a quantidade para 0
+                    # self.db_session.add(batch) # Não é estritamente necessário aqui se o batch já está attached
+            
+            # Força o SQLAlchemy a ver que esses objetos 'batch' foram modificados
+            # Mesmo que eles já estejam "attached", adicionar garante que as mudanças sejam rastreadas.
+            self.db_session.add_all(batches) # Adiciona todos os lotes de volta para a sessão rastrear as mudanças
 
-            self.db_session.add(model)
+            self.db_session.add(model) # Adiciona o registro da venda
 
-        if type(model) is list:
-
+        if isinstance(model, list): # `type(model) is list` é mais robusto em Python
             for item in model:
                 await local_add(item)
-
-            model = model[0]  # Return the first model for consistency
+            model = model[0]
         else:
-            print("Adding model:", model)
             await local_add(model)
 
-        await self.db_session.commit()
+        await self.db_session.commit() # Comita todas as mudanças (lotes e vendas)
 
         await self.db_session.refresh(model)
 
         return model
-
     async def get(
         self,
         id: str | None = None,

@@ -168,14 +168,33 @@ class ProductRepository:
         result = await self.db_session.execute(query)
         return result.unique().scalars().all() if all_results else result.unique().scalar_one_or_none()
 
-    async def update_product_batch(self, product_batch: ProductBatchModel) -> ProductBatchModel:
+    async def update_product_batch(
+        self,
+        product_batch: ProductBatchModel,
+    ) -> ProductBatchModel:
+        """
+        Update an existing product batch in the database.
+        """
+        # DEBUG PRINTS ADICIONADOS AQUI
+        print(f"DEBUG REPO: Recebido lote {product_batch.id} para persistir. Qtd: {product_batch.quantity}. Validade: {product_batch.validity}") # <-- ADICIONAR
+        
+        # CORREÇÃO: Garante que a sessão rastreie as mudanças no objeto
+        self.db_session.add(product_batch) # <-- ESSA LINHA É A CORREÇÃO MAIS PROVÁVEL PARA PERSISTÊNCIA
+        
         try:
             await self.db_session.commit()
-            await self.db_session.refresh(product_batch)
-            return product_batch
-        except Exception:
-            await self.db_session.rollback()
-            raise
+            # DEBUG PRINTS ADICIONADOS AQUI
+            print(f"DEBUG REPO: Commit concluído para lote {product_batch.id}.") 
+        except Exception as e:
+            # DEBUG PRINTS ADICIONADOS AQUI
+            print(f"DEBUG REPO: Erro no commit para lote {product_batch.id}: {e}") 
+            await self.db_session.rollback() # Garante rollback em caso de erro
+            raise ServerError(f"Falha ao atualizar lote no DB: {e}") 
+        
+        await self.db_session.refresh(product_batch)
+        # DEBUG PRINTS ADICIONADOS AQUI
+        print(f"DEBUG REPO: Lote {product_batch.id} atualizado e refrescado. Qtd após refresh: {product_batch.quantity}") # <-- ADICIONAR
+        return product_batch
 
     async def delete_product_batch(self, product_batch: ProductBatchModel | None = None, product_batch_id: str | None = None) -> None:
         try:
