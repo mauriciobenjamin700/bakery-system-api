@@ -28,62 +28,11 @@ from app.schemas.product import (
 
 
 class ProductRepository:
-    """
-    A class to handle database operations related to products.
-
-    Methods:
-        add(model: ProductModel) -> ProductModel:
-            Add a new product to the database.
-
-        get(product_id: str | None = None) -> ProductModel | list[ProductModel] | None:
-            Get a product by its ID.
-
-        update(model: ProductModel) -> ProductModel:
-            Update an existing product in the database.
-
-        delete(model: ProductModel | None = None, product_id: str | None = None) -> None:
-            Delete a product from the database.
-
-        add_portion(portion: PortionModel) -> PortionModel:
-            Add a portion to a product.
-
-        get_portion(portion_id: str | None = None, product_id: str | None = None, all_results: bool = False) -> PortionModel | list[PortionModel] | None:
-            Get a portion by its ID.
-
-        update_portion(portion: PortionModel) -> PortionModel:
-            Update an existing portion in the database.
-
-        delete_portion(portion: PortionModel | None = None, portion_id: str | None = None) -> None:
-            Delete a portion from the database.
-
-        add_product_batch(product_batch: ProductBatchModel) -> ProductBatchModel:
-            Add a product batch to a product.
-
-        get_product_batch(product_batch_id: str | None = None, product_id: str | None = None, all_results: bool = False) -> ProductBatchModel | list[ProductBatchModel] | None:
-            Get a product batch by its ID.
-
-        update_product_batch(product_batch: ProductBatchModel) -> ProductBatchModel:
-            Update an existing product batch in the database.
-
-        delete_product_batch(product_batch: ProductBatchModel | None = None, product_batch_id: str | None = None) -> None:
-            Delete a product batch from the database.
-    """
-
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
     async def add(self, model: ProductModel) -> ProductModel:
-        """
-        Add a new product to the database.
-
-        Args:
-            model (ProductModel): The product model to be added.
-
-        Returns:
-            ProductModel: The added product model.
-        """
         try:
-
             stmt = select(ProductModel).where(
                 ProductModel.name == model.name,
                 ProductModel.price_cost == model.price_cost,
@@ -96,343 +45,165 @@ class ProductRepository:
             )
 
             result = await self.db_session.execute(stmt)
-
             existing_product = result.unique().scalar_one_or_none()
+
             if existing_product:
-                raise ConflictError(
-                    messages.ERROR_DATABASE_PRODUCT_ALREADY_EXISTS
-                )
+                raise ConflictError(messages.ERROR_DATABASE_PRODUCT_ALREADY_EXISTS)
 
             self.db_session.add(model)
             await self.db_session.commit()
             await self.db_session.refresh(model)
             return model
 
-        except ConflictError as e:
-            raise e
-
+        except ConflictError:
+            await self.db_session.rollback()
+            raise
         except Exception as e:
+            await self.db_session.rollback()
             raise ServerError(e)
 
-    async def get(
-        self, product_id: str | None = None
-    ) -> ProductModel | Sequence[ProductModel] | None:
-        """
-        Get a product by its ID.
-
-        Args:
-            product_id (str): The ID of the product to retrieve.
-
-        Returns:
-            ProductModel: The retrieved product model.
-        """
-
+    async def get(self, product_id: str | None = None) -> ProductModel | Sequence[ProductModel] | None:
         if product_id:
-
             query = select(ProductModel).where(ProductModel.id == product_id)
-
             result = await self.db_session.execute(query)
-
             response = result.unique().scalar_one_or_none()
-
         else:
             query = select(ProductModel)
             result = await self.db_session.execute(query)
-            response = result.unique().scalars().all()
-
-            if not response:
-                response = None
-
+            response = result.unique().scalars().all() or None
         return response
 
     async def update(self, model: ProductModel) -> ProductModel:
-        """
-        Update an existing product in the database.
-
-        Args:
-            model (ProductModel): The product model to be updated.
-
-        Returns:
-            ProductModel: The updated product model.
-        """
-        await self.db_session.commit()
-        await self.db_session.refresh(model)
-        return model
-
-    async def delete(
-        self,
-        model: ProductModel | None = None,
-        product_id: str | None = None,
-    ) -> None:
-        """
-        Delete a product from the database.
-
-        Args:
-            model (ProductModel | None): The product model to be deleted.
-            product_id (str | None): The ID of the product to be deleted.
-
-        Returns:
-            None
-        """
-        if model is not None:
-            await self.db_session.delete(model)
-        elif product_id is not None:
-            query = delete(ProductModel).where(ProductModel.id == product_id)
-            result = await self.db_session.execute(query)
-            if result.rowcount == 0:
-                raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
-        else:
-            raise BadRequestError(
-                "Either model or product_id must be provided"
-            )
-
-        await self.db_session.commit()
-
-    async def add_portion(
-        self,
-        portion: PortionModel | list[PortionModel],
-    ) -> PortionModel | None:
-        """
-        Add a portion to a product.
-
-        Args:
-            product (ProductModel): The product to which the portion will be added.
-            portion (PortionModel): The portion to be added.
-
-        Returns:
-            PortionModel: The added portion model.
-        """
-        if isinstance(portion, list):
-            self.db_session.add_all(portion)
+        try:
             await self.db_session.commit()
+            await self.db_session.refresh(model)
+            return model
+        except Exception:
+            await self.db_session.rollback()
+            raise
 
+    async def delete(self, model: ProductModel | None = None, product_id: str | None = None) -> None:
+        try:
+            if model is not None:
+                await self.db_session.delete(model)
+            elif product_id is not None:
+                query = delete(ProductModel).where(ProductModel.id == product_id)
+                result = await self.db_session.execute(query)
+                if result.rowcount == 0:
+                    raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_NOT_FOUND)
+            else:
+                raise BadRequestError("Either model or product_id must be provided")
+            await self.db_session.commit()
+        except Exception:
+            await self.db_session.rollback()
+            raise
+
+    async def add_portion(self, portion: PortionModel | list[PortionModel]) -> PortionModel | None:
+        try:
+            if isinstance(portion, list):
+                self.db_session.add_all(portion)
+                await self.db_session.commit()
+            else:
+                self.db_session.add(portion)
+                await self.db_session.commit()
+                await self.db_session.refresh(portion)
+                return portion
+        except Exception:
+            await self.db_session.rollback()
+            raise
+
+    async def get_portion(self, portion_id: str | None = None, product_id: str | None = None, all_results: bool = False) -> PortionModel | Sequence[PortionModel] | None:
+        if portion_id:
+            query = select(PortionModel).where(PortionModel.id == portion_id)
+        elif product_id:
+            query = select(PortionModel).where(PortionModel.product_id == product_id)
         else:
-            self.db_session.add(portion)
+            query = select(PortionModel)
+        result = await self.db_session.execute(query)
+        return result.unique().scalars().all() if all_results else result.unique().scalar_one_or_none()
+
+    async def update_portion(self, portion: PortionModel) -> PortionModel:
+        try:
             await self.db_session.commit()
             await self.db_session.refresh(portion)
             return portion
+        except Exception:
+            await self.db_session.rollback()
+            raise
 
-    async def get_portion(
-        self,
-        portion_id: str | None = None,
-        product_id: str | None = None,
-        all_results: bool = False,
-    ) -> PortionModel | Sequence[PortionModel] | None:
-        """
-        Get a portion by its ID.
+    async def delete_portion(self, portion: PortionModel | None = None, portion_id: str | None = None) -> None:
+        try:
+            if portion is not None:
+                await self.db_session.delete(portion)
+            elif portion_id is not None:
+                query = delete(PortionModel).where(PortionModel.id == portion_id)
+                result = await self.db_session.execute(query)
+                if result.rowcount == 0:
+                    raise NotFoundError(messages.ERROR_PORTION_NOT_FOUND)
+            else:
+                raise BadRequestError("Either model or portion_id must be provided")
+            await self.db_session.commit()
+        except Exception:
+            await self.db_session.rollback()
+            raise
 
-        Args:
-            product_id (str): The ID of the product to retrieve.
+    async def add_product_batch(self, product_batch: ProductBatchModel) -> ProductBatchModel:
+        try:
+            self.db_session.add(product_batch)
+            await self.db_session.commit()
+            await self.db_session.refresh(product_batch)
+            return product_batch
+        except Exception:
+            await self.db_session.rollback()
+            raise
 
-        Returns:
-            PortionModel: The retrieved portion model.
-        """
-        if portion_id:
-            query = select(PortionModel).where(PortionModel.id == portion_id)
-            result = await self.db_session.execute(query)
-
-        elif product_id:
-            query = select(PortionModel).where(
-                PortionModel.product_id == product_id
-            )
-            result = await self.db_session.execute(query)
-        else:
-            query = select(PortionModel)
-            result = await self.db_session.execute(query)
-
-        if all_results:
-            response = result.unique().scalars().all()
-        else:
-            response = result.unique().scalar_one_or_none()
-
-        return response
-
-    async def update_portion(
-        self,
-        portion: PortionModel,
-    ) -> PortionModel:
-        """
-        Update an existing portion in the database.
-
-        Args:
-            portion (PortionModel): The portion model to be updated.
-
-        Returns:
-            PortionModel: The updated portion model.
-        """
-        await self.db_session.commit()
-        await self.db_session.refresh(portion)
-        return portion
-
-    async def delete_portion(
-        self,
-        portion: PortionModel | None = None,
-        portion_id: str | None = None,
-    ) -> None:
-        """
-        Delete a portion from the database.
-
-        Args:
-            model (PortionModel | None): The portion model to be deleted.
-            portion_id (str | None): The ID of the portion to be deleted.
-
-        Returns:
-            None
-        """
-        if portion is not None:
-            await self.db_session.delete(portion)
-        elif portion_id is not None:
-            query = delete(PortionModel).where(PortionModel.id == portion_id)
-            result = await self.db_session.execute(query)
-            if result.rowcount == 0:
-                raise NotFoundError(messages.ERROR_PORTION_NOT_FOUND)
-        else:
-            raise BadRequestError(
-                "Either model or portion_id must be provided"
-            )
-
-        await self.db_session.commit()
-
-    async def add_product_batch(
-        self,
-        product_batch: ProductBatchModel,
-    ) -> ProductBatchModel:
-        """
-        Add a product batch to a product.
-
-        Args:
-            product (ProductModel): The product to which the batch will be added.
-            product_batch (ProductBatchModel): The batch to be added.
-
-        Returns:
-            ProductBatchModel: The added batch model.
-        """
-        self.db_session.add(product_batch)
-        await self.db_session.commit()
-        await self.db_session.refresh(product_batch)
-        return product_batch
-
-    async def get_product_batch(
-        self,
-        product_batch_id: str | None = None,
-        product_id: str | None = None,
-        all_results: bool = False,
-    ) -> ProductBatchModel | Sequence[ProductBatchModel] | None:
-        """
-        Get a product batch by its ID.
-
-        Args:
-            product_batch_id (str): The ID of the product batch to retrieve.
-
-        Returns:
-            ProductBatchModel: The retrieved product batch model.
-        """
+    async def get_product_batch(self, product_batch_id: str | None = None, product_id: str | None = None, all_results: bool = False) -> ProductBatchModel | Sequence[ProductBatchModel] | None:
         if product_batch_id:
-            query = select(ProductBatchModel).where(
-                ProductBatchModel.id == product_batch_id
-            )
-            result = await self.db_session.execute(query)
-
+            query = select(ProductBatchModel).where(ProductBatchModel.id == product_batch_id)
         elif product_id:
-            query = select(ProductBatchModel).where(
-                ProductBatchModel.product_id == product_id
-            )
-            result = await self.db_session.execute(query)
+            query = select(ProductBatchModel).where(ProductBatchModel.product_id == product_id)
         else:
             query = select(ProductBatchModel)
-            result = await self.db_session.execute(query)
 
-        if all_results:
-            response = result.unique().scalars().all()
-        else:
-            response = result.unique().scalar_one_or_none()
+        result = await self.db_session.execute(query)
+        return result.unique().scalars().all() if all_results else result.unique().scalar_one_or_none()
 
-        return response
+    async def update_product_batch(self, product_batch: ProductBatchModel) -> ProductBatchModel:
+        try:
+            await self.db_session.commit()
+            await self.db_session.refresh(product_batch)
+            return product_batch
+        except Exception:
+            await self.db_session.rollback()
+            raise
 
-    async def update_product_batch(
-        self,
-        product_batch: ProductBatchModel,
-    ) -> ProductBatchModel:
-        """
-        Update an existing product batch in the database.
-
-        Args:
-            product_batch (ProductBatchModel): The product batch model to be updated.
-
-        Returns:
-            ProductBatchModel: The updated product batch model.
-        """
-        await self.db_session.commit()
-        await self.db_session.refresh(product_batch)
-        return product_batch
-
-    async def delete_product_batch(
-        self,
-        product_batch: ProductBatchModel | None = None,
-        product_batch_id: str | None = None,
-    ) -> None:
-        """
-        Delete a product batch from the database.
-
-        Args:
-            model (ProductBatchModel | None): The product batch model to be deleted.
-            product_batch_id (str | None): The ID of the product batch to be deleted.
-
-        Returns:
-            None
-        """
-        if product_batch is not None:
-            await self.db_session.delete(product_batch)
-        elif product_batch_id is not None:
-            query = delete(ProductBatchModel).where(
-                ProductBatchModel.id == product_batch_id
-            )
-            result = await self.db_session.execute(query)
-            if result.rowcount == 0:
-                raise NotFoundError(
-                    messages.ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND
-                )
-        else:
-            raise BadRequestError(
-                "Either model or product_batch_id must be provided"
-            )
-
-        await self.db_session.commit()
+    async def delete_product_batch(self, product_batch: ProductBatchModel | None = None, product_batch_id: str | None = None) -> None:
+        try:
+            if product_batch is not None:
+                await self.db_session.delete(product_batch)
+            elif product_batch_id is not None:
+                query = delete(ProductBatchModel).where(ProductBatchModel.id == product_batch_id)
+                result = await self.db_session.execute(query)
+                if result.rowcount == 0:
+                    raise NotFoundError(messages.ERROR_DATABASE_PRODUCT_BATCH_NOT_FOUND)
+            else:
+                raise BadRequestError("Either model or product_batch_id must be provided")
+            await self.db_session.commit()
+        except Exception:
+            await self.db_session.rollback()
+            raise
 
     @staticmethod
-    def map_product_request_to_model(
-        request: ProductRequest, image_path: str
-    ) -> tuple[ProductModel, list[PortionModel], ProductBatchModel]:
-        """
-        Map a product request to a product model.
+    def map_product_request_to_model(request: ProductRequest, image_path: str) -> tuple[ProductModel, list[PortionModel], ProductBatchModel]:
+        product = ProductModel(**request.to_dict(
+            exclude=["recipe", "quantity", "validity"],
+            include={"id": id_generator(), "image_path": image_path},
+        ))
 
-        Args:
-            request (ProductRequest): The product request to be mapped.
-
-        Returns:
-            ProductModel: The mapped product model.
-        """
-        product = ProductModel(
-            **request.to_dict(
-                exclude=["recipe", "quantity", "validity"],
-                include={"id": id_generator(), "image_path": image_path},
-            )
-        )
-
-        portions = []
-
-        if request.recipe:
-            for portion in request.recipe:
-                portions.append(
-                    PortionModel(
-                        **portion.to_dict(
-                            include={
-                                "id": id_generator(),
-                                "product_id": product.id,
-                            }
-                        )
-                    )
-                )
+        portions = [
+            PortionModel(**portion.to_dict(include={"id": id_generator(), "product_id": product.id}))
+            for portion in request.recipe
+        ] if request.recipe else []
 
         batch = ProductBatchModel(
             id=id_generator(),
@@ -443,57 +214,44 @@ class ProductRepository:
 
         return product, portions, batch
 
-    async def map_product_model_to_response(
-        self, model: ProductModel
-    ) -> ProductResponse:
-        """
-        Async method tp map a product model to a product response.
+    @staticmethod
+    def map_product_batch_request_to_model(request: ProductBatchRequest) -> ProductBatchModel:
+        return ProductBatchModel(**request.to_dict())
 
-        Args:
-            model (ProductModel): The product model to be mapped.
+    @staticmethod
+    def map_recipe_request_to_models(request: RecipeRequest) -> list[PortionModel]:
+        return [
+            PortionModel(
+                ingredient_id=portion.ingredient_id,
+                product_id=request.product_id,
+                quantity=portion.quantity,
+            )
+            for portion in request.recipe
+        ]
 
-        Returns:
-            ProductResponse: The mapped product response.
-        """
-
-        batch_models_result = await self.get_product_batch(
-            product_id=model.id, all_results=True
+    async def map_product_model_to_response(self, model: ProductModel) -> ProductResponse:
+        batch_models_result = await self.get_product_batch(product_id=model.id, all_results=True)
+        batch_models = (
+            [batch_models_result]
+            if isinstance(batch_models_result, ProductBatchModel)
+            else batch_models_result or []
         )
-        if batch_models_result is None:
-            batch_models: Sequence[ProductBatchModel] = []
-        elif isinstance(batch_models_result, ProductBatchModel):
-            batch_models: Sequence[ProductBatchModel] = [batch_models_result]
-        else:
-            batch_models: Sequence[ProductBatchModel] = batch_models_result
 
-        quantity = 0
-        batches = None
-        recipe = None
+        quantity = sum(batch.quantity for batch in batch_models)
+        batches = [ProductBatchResponse(**batch.to_dict()) for batch in batch_models] if batch_models else None
 
-        if batch_models:
-            batches = []
-            for batch in batch_models:
-                batch: ProductBatchModel
-                quantity += batch.quantity
-                batches.append(ProductBatchResponse(**batch.to_dict()))
-
-        portions = await self.get_portion(
-            product_id=model.id, all_results=True
-        )
+        portions = await self.get_portion(product_id=model.id, all_results=True)
+        recipe = []
 
         if portions:
-            recipe = []
             for portion in portions:
-                portion: PortionModel
-                stmt = select(IngredientModel).where(
-                    IngredientModel.id == portion.ingredient_id
-                )
+                stmt = select(IngredientModel).where(IngredientModel.id == portion.ingredient_id)
                 result = await self.db_session.execute(stmt)
                 ingredient = result.unique().scalar_one_or_none()
+
                 if not ingredient:
-                    raise NotFoundError(
-                        messages.ERROR_DATABASE_INGREDIENT_NOT_FOUND
-                    )
+                    raise NotFoundError(messages.ERROR_DATABASE_INGREDIENT_NOT_FOUND)
+
                 recipe.append(
                     PortionResponse(
                         **portion.to_dict(
