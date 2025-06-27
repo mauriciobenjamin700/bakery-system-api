@@ -5,8 +5,8 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import NotFoundError
-from app.db.models import ProductModel, SaleModel # Supondo que você tem um UserModel também
-from app.db.repositories import ProductRepository, SaleRepository # Supondo que você tem um UserRepository
+from app.db.models import ProductModel, SaleModel 
+from app.db.repositories import ProductRepository, SaleRepository 
 from app.schemas import ProductReportResponse
 
 
@@ -21,7 +21,7 @@ class ReportService:
     def __init__(self, session: AsyncSession):
         self.product_repository = ProductRepository(session)
         self.sale_repository = SaleRepository(session)
-        # self.user_repository = UserRepository(session) # Se fosse para buscar nome de usuário na API
+       
 
     async def get_product_report(
         self,
@@ -38,13 +38,13 @@ class ReportService:
 
         response = {}
 
-        products: Sequence[ProductModel] = await self.product_repository.get()  # type: ignore
+        products: Sequence[ProductModel] = await self.product_repository.get()  
 
-        if not products: # Melhor verificar se a sequência está vazia
+        if not products:
             raise NotFoundError("No products found")
 
         sales: list[SaleModel] = await self.sale_repository.get(
-            all_results=True  # type: ignore
+            all_results=True  
         )
 
         if not sales:
@@ -70,14 +70,14 @@ class ReportService:
                 "id",
                 "product_id",
                 "user_id",
-                "is_paid", "quantity", # CORRIGIDO: VÍRGULA ADICIONADA AQUI
+                "is_paid", "quantity",
                 "value",
                 "sale_code",
                 "created_at",
             ],
         )
 
-        # Garantir que created_at seja datetime para comparações
+        
         sale_df["created_at"] = pd.to_datetime(sale_df["created_at"])
         product_df["created_at"] = pd.to_datetime(product_df["created_at"])
 
@@ -92,7 +92,7 @@ class ReportService:
                 & (product_df["created_at"] <= end_date)
             ]
         elif start_date:
-            # Para range de um dia, garantir que inclua o dia inteiro
+           
             end_of_day = datetime(start_date.year, start_date.month, start_date.day, 23, 59, 59, 999999)
             sale_df = sale_df[
                 (sale_df["created_at"] >= start_date)
@@ -103,7 +103,7 @@ class ReportService:
                 & (product_df["created_at"] <= end_of_day)
             ]
         elif end_date:
-            # Para range de um dia, garantir que inclua o dia inteiro
+           
             end_of_day = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59, 999999)
             sale_df = sale_df[
                 (sale_df["created_at"] >= end_date.replace(hour=0, minute=0, second=0, microsecond=0))
@@ -114,12 +114,11 @@ class ReportService:
                 & (product_df["created_at"] <= end_of_day)
             ]
 
-        # Tratamento de DataFrames vazios APÓS filtragem por data
+       
         if sale_df.empty:
             raise NotFoundError("No sales found in the specified date range")
         if product_df.empty:
-            # Se não houver produtos no range, significa que as vendas também não terão produtos associados válidos
-            # mas o erro de NotFoundError pode ser mais útil aqui.
+            
             raise NotFoundError("No products found in the specified date range")
 
 
@@ -137,10 +136,10 @@ class ReportService:
             right_on="id",
             how="left",
         )
-        # Preencher NaNs que possam surgir de merge onde o produto_id da venda não foi encontrado no product_df
+        
         top_selling_product['name'] = top_selling_product['name'].fillna('Produto Desconhecido')
-        top_selling_product['id'] = top_selling_product['id'].fillna('') # ID pode ser string vazia ou outro valor padrão
-        top_selling_product['quantity'] = top_selling_product['quantity'].fillna(0) # Quantidade deve ser 0 se NaN
+        top_selling_product['id'] = top_selling_product['id'].fillna('') 
+        top_selling_product['quantity'] = top_selling_product['quantity'].fillna(0) 
 
         top_selling_product = top_selling_product[
             ["id", "name", "quantity"]
@@ -149,14 +148,12 @@ class ReportService:
             orient="records"
         )
 
-        # --- TOP LEAST SOLD PRODUCTS ---
-        # CORRIGIDO: Lógica para "menos vendidos"
-        # Usamos o mesmo agrupamento, mas ordenamos de forma ascendente
+       
         top_least_sold_products = (
             sale_df.groupby("product_id")
             .agg({"quantity": "sum"})
             .reset_index()
-            .sort_values(by="quantity", ascending=True) # <-- CORRIGIDO AQUI
+            .sort_values(by="quantity", ascending=True) 
         )
 
         top_least_sold_products = top_least_sold_products.merge(
@@ -200,8 +197,8 @@ class ReportService:
 
 
         
-        number_of_products_sold: float = sale_df["quantity"].sum() # Pode ser float se a soma der NaN
-        response["number_of_products_sold"] = int(number_of_products_sold) if not pd.isna(number_of_products_sold) else 0 # Tratando NaN e convertendo para int
+        number_of_products_sold: float = sale_df["quantity"].sum() 
+        response["number_of_products_sold"] = int(number_of_products_sold) if not pd.isna(number_of_products_sold) else 0 
 
         
         mean_ticket = (
@@ -225,14 +222,14 @@ class ReportService:
         final_top_seller_list = []
         for index, row in top_seller.iterrows():
             final_top_seller_list.append({
-                "id": str(row["id"]), # Garante que seja string
-                # CORRIGIDO: Removido o acesso a row['name'] que não existe
-                "name": f"Usuário {row['id']}", # Adiciona um nome genérico. Se você tem um nome real em outro lugar, use-o.
-                "total_sales": float(row["total_sales"]) # Garante que seja float
+                "id": str(row["id"]), 
+                
+                "name": f"Usuário {row['id']}",
+                "total_sales": float(row["total_sales"]) 
             })
         response["top_seller"] = final_top_seller_list
 
-        # Depuração final para ter certeza de que não há NaNs na resposta
+       
         print(f"DEBUG FINAL RESPONSE: {response}")
 
 
